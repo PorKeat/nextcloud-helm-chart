@@ -1,0 +1,34 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Release.Name }}-background-cron
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: background-cron
+spec:
+  schedule: "*/5 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: background-cron
+        spec:
+          serviceAccountName: {{ .Release.Name }}-admin-sa
+          restartPolicy: OnFailure
+          containers:
+            - name: background-cron
+              image: bitnami/kubectl:latest
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  POD_NAME=$(kubectl get pod -l app.kubernetes.io/name=nextcloud -n {{ .Release.Namespace }} -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+                  if [ -n "$POD_NAME" ]; then
+                    kubectl exec -n {{ .Release.Namespace }} $POD_NAME -c nextcloud -- php /var/www/html/occ background:cron
+                  else
+                    echo "Nextcloud pod not ready, skipping cron run."
+                  fi

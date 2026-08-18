@@ -191,6 +191,9 @@ nextcloud:
       - name: performance-config
         configMap:
           name: nextcloud-performance-tuning
+      - name: custom-assets
+        configMap:
+          name: nextcloud-custom-assets
     extraVolumeMounts:
       - name: collabora-config
         mountPath: /var/www/html/config/collabora.config.php
@@ -207,6 +210,8 @@ nextcloud:
       - name: performance-config
         mountPath: /var/www/html/config/tuning.config.php
         subPath: tuning.config.php
+      - name: custom-assets
+        mountPath: /custom_assets
 
     objectStore:
       s3:

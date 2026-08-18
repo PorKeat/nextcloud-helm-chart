@@ -35,4 +35,5 @@ data:
       'session_lifetime' => 86400,
       'auth.bruteforce.protection.enabled' => true,
       'simpleSignUpLink.shown' => false,
+      'backgroundjobs_mode' => 'cron',
     ];
