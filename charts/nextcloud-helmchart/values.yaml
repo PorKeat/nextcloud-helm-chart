@@ -176,7 +176,7 @@ nextcloud:
         session.save_path = "tcp://nextcloud-redis-master:6379?auth=RedisPassword%401234"
         session.gc_maxlifetime = 86400
     
-    # Auto-mount Configurations
+    # Auto-mount Configurations & In-Pod Hooks
     extraVolumes:
       - name: collabora-config
         configMap:
@@ -187,6 +187,7 @@ nextcloud:
       - name: theming-config
         configMap:
           name: nextcloud-theming-config
+          defaultMode: 0755
       - name: performance-config
         configMap:
           name: nextcloud-performance-tuning
@@ -200,6 +201,9 @@ nextcloud:
       - name: theming-config
         mountPath: /var/www/html/config/theming.config.php
         subPath: theming.config.php
+      - name: theming-config
+        mountPath: /docker-entrypoint-hooks.d/before-starting/auto-setup.sh
+        subPath: auto-setup.sh
       - name: performance-config
         mountPath: /var/www/html/config/tuning.config.php
         subPath: tuning.config.php
