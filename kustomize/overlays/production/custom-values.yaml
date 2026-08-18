@@ -81,6 +81,7 @@ collabora:
       memory: 3Gi
 
 collaboraHPA:
+  enabled: true
   minReplicas: 1
   maxReplicas: 4
 
@@ -102,8 +103,7 @@ nextcloud:
       memory: 2Gi
 
 nextcloudHPA:
-  minReplicas: 1
-  maxReplicas: 4
+  enabled: false
 
 # ------------------------------------------------------------------------------
 # MINIO S3 OBJECT STORAGE
