@@ -18,6 +18,7 @@ spec:
           labels:
             app.kubernetes.io/name: preview-generator
         spec:
+          serviceAccountName: {{ .Release.Name }}-admin-sa
           restartPolicy: OnFailure
           containers:
             - name: preview-generator
