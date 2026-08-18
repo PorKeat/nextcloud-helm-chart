@@ -50,7 +50,7 @@ branding:
 features:
   disableAds: true                 # Disables first-run wizard, promo popups, and recommendations
   disableSkeletonDirectory: true   # Keeps new user accounts 100% empty (no default demo files/photos)
-  disableAuditWarning: true        # Suppresses hardware warning popup in Nextcloud Office
+  disableAuditWarning: true        # Completely suppresses Collabora Server Audit popup modal
 
 # 6. MinIO S3 Object Storage (Primary Storage)
 minio:
@@ -228,7 +228,7 @@ collabora:
   domain: "office.sengporkeat.com"
   aliasGroups:
     - host: "https://nextcloud.sengporkeat.com"
-  extraParams: "--o:ssl.enable=false --o:ssl.termination=true --o:mount_jail_tree=false --o:net.proto=IPv4 --o:num_prespawn_children=2"
+  extraParams: "--o:ssl.enable=false --o:ssl.termination=true --o:mount_jail_tree=false --o:net.proto=IPv4 --o:num_prespawn_children=2 --o:logging.disable_server_audit=true"
   env:
     - name: username
       value: "admin"
