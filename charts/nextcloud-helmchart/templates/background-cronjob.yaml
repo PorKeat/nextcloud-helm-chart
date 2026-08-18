@@ -26,7 +26,7 @@ spec:
                 - /bin/sh
                 - -c
                 - |
-                  POD_NAME=$(kubectl get pod -l app.kubernetes.io/name=nextcloud -n {{ .Release.Namespace }} -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+                  POD_NAME=$(kubectl get pod -l app.kubernetes.io/name=nextcloud -n {{ .Release.Namespace }} --field-selector=status.phase=Running -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
                   if [ -n "$POD_NAME" ]; then
                     kubectl exec -n {{ .Release.Namespace }} $POD_NAME -c nextcloud -- php /var/www/html/occ background:cron
                   else
