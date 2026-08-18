@@ -1,6 +1,6 @@
 # Nextcloud Enterprise Helm Chart (Nextcloud + Collabora + Redis + MinIO + HPA)
 
-A production-ready Umbrella Helm Chart and configuration package for deploying Nextcloud with Collabora Online Office, Redis session caching, MinIO S3 object storage, and Horizontal Pod Autoscaling (HPA: 2 to 6 replicas).
+A production-ready Umbrella Helm Chart and Kustomize package for deploying Nextcloud with Collabora Online Office, Redis session caching, MinIO S3 object storage, and Horizontal Pod Autoscaling (HPA: 2 to 6 replicas).
 
 ---
 
@@ -13,6 +13,22 @@ A production-ready Umbrella Helm Chart and configuration package for deploying N
 * **Database Options**: Support for PostgreSQL, MariaDB/MySQL, and SQLite
 * **Longhorn CSI**: Replicated storage for Database and application configuration
 * **Traefik Ingress**: Layer 7 routing with automated Let's Encrypt TLS/HTTPS certificates
+
+---
+
+## Environment Overlays (Production vs Development)
+
+The repository includes dedicated Kustomize overlays for **Production** and **Development**:
+
+| Feature | Production (`overlays/production/`) | Development (`overlays/dev/`) |
+| :--- | :--- | :--- |
+| **Namespace** | `nextcloud-system` | `nextcloud-dev` |
+| **Domain** | `nextcloud.sengporkeat.com` | `dev-nextcloud.sengporkeat.com` |
+| **Database** | PostgreSQL with 8Gi Longhorn storage | SQLite (Zero extra memory/pods) |
+| **Redis** | Enabled (Session caching) | Disabled (Save compute) |
+| **Collabora Office** | Enabled with HPA | Disabled (Optional toggle) |
+| **Replicas & HPA** | 2 to 6 replicas auto-scaling | 1 single replica (HPA disabled) |
+| **Branding** | Purple `#7D54D3` | Dev Orange `#E05638` |
 
 ---
 
@@ -112,19 +128,27 @@ nextcloud-helm-chart/
 │           └── theming-configmap.yaml  # Applies custom branding colors & embedded images
 │
 └── kustomize/
-    └── overlays/production/
-        └── custom-values.yaml          # Easily customizable environment overrides
+    ├── base/
+    │   └── kustomization.yaml          # Base Kustomize manifest referencing the Helm chart
+    └── overlays/
+        ├── production/
+        │   ├── kustomization.yaml      # Production overlay
+        │   └── custom-values.yaml      # Production overrides (Postgres, Redis, HPA, MinIO)
+        └── dev/
+            ├── kustomization.yaml      # Dev overlay
+            └── custom-values.yaml      # Lightweight Dev overrides (SQLite, single replica)
 ```
 
 ---
 
-## Deployment Command (Single Step)
+## Deployment Commands
 
+### Deploy Production Environment
 ```bash
-# 1. Build chart dependencies
+# 1. Build chart dependencies (First time only)
 helm dependency build ./charts/nextcloud-helmchart
 
-# 2. Deploy or upgrade with your custom-values overrides
+# 2. Deploy Production
 helm upgrade --install nextcloud ./charts/nextcloud-helmchart \
   --namespace nextcloud-system \
   --create-namespace \
@@ -133,17 +157,27 @@ helm upgrade --install nextcloud ./charts/nextcloud-helmchart \
 
 ---
 
+### Deploy Development Environment (Lightweight / Testing)
+```bash
+helm upgrade --install nextcloud-dev ./charts/nextcloud-helmchart \
+  --namespace nextcloud-dev \
+  --create-namespace \
+  -f ./kustomize/overlays/dev/custom-values.yaml
+```
+
+---
+
 ## Verification Commands
 
 ```bash
-# Check all pods are running
+# Check all pods are running in production
 kubectl get pods -n nextcloud-system
+
+# Check dev pods
+kubectl get pods -n nextcloud-dev
 
 # Check HPA autoscalers
 kubectl get hpa -n nextcloud-system
-
-# Check Ingress & SSL certificates
-kubectl get ingress,certificate -n nextcloud-system
 ```
 
 ---
@@ -151,5 +185,9 @@ kubectl get ingress,certificate -n nextcloud-system
 ## Teardown / Uninstall
 
 ```bash
+# Uninstall Production
 helm uninstall nextcloud -n nextcloud-system
+
+# Uninstall Development
+helm uninstall nextcloud-dev -n nextcloud-dev
 ```

@@ -8,5 +8,7 @@ helmCharts:
     releaseName: nextcloud
     namespace: nextcloud-system
     version: 1.0.0
-    repo: file://../../charts/nextcloud-helmchart
+    repo: https://PorKeat.github.io/nextcloud-helm-chart/
     valuesFile: ../../charts/nextcloud-helmchart/values.yaml
+    additionalValuesFiles:
+      - ../overlays/production/custom-values.yaml

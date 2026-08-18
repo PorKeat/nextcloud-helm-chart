@@ -1,0 +1,65 @@
+# ==============================================================================
+# DEV ENVIRONMENT OVERRIDES (LIGHTWEIGHT / MINIMAL RESOURCES)
+# ==============================================================================
+
+global:
+  security:
+    allowInsecureImages: true
+
+# 1. Dev Domains
+domain:
+  nextcloud: "dev-nextcloud.sengporkeat.com"
+  collabora: "dev-office.sengporkeat.com"
+
+# 2. Database Engine (SQLite for zero extra pods or lightweight Postgres)
+database:
+  type: "sqlite"                        # SQLite embedded = fast and zero memory overhead for Dev
+
+# 3. Disable MariaDB & Redis in Dev to save cluster RAM
+mariadb:
+  enabled: false
+
+redis:
+  enabled: false
+
+# 4. Minimal Replicas & Resource Requests for Dev
+nextcloud:
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+nextcloudHPA:
+  enabled: false                        # Disabled in Dev to save compute
+
+collabora:
+  enabled: false                        # Disabled in Dev (enable if testing Office)
+  replicaCount: 1
+
+collaboraHPA:
+  enabled: false
+
+# 5. MinIO S3 Object Storage (Connect to shared or local)
+minio:
+  enabled: false                        # Use local disk in Dev or set true to test S3
+  installEmbedded: false
+
+# 6. Theming (Dev Label to easily distinguish from Prod)
+branding:
+  name: "Kubesquare Cloud [DEV]"
+  slogan: "Development & Testing Environment"
+  primaryColor: "#E05638"               # Warning / Dev Orange Color
+  backgroundColor: "#000000"
+  removeBackgroundImage: false
+
+features:
+  disableAds: true
+  disableSkeletonDirectory: true
+
+admin:
+  username: "admin"
+  password: "DevPassword@1234"
