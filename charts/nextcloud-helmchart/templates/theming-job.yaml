@@ -26,7 +26,7 @@ spec:
               echo "Waiting for Nextcloud pod to be ready..."
               kubectl wait --for=condition=Ready pod -l app.kubernetes.io/name=nextcloud -n {{ .Release.Namespace }} --timeout=300s
               POD_NAME=$(kubectl get pod -l app.kubernetes.io/name=nextcloud -n {{ .Release.Namespace }} -o jsonpath='{.items[0].metadata.name}')
-              echo "Applying custom colors, branding, and Collabora Office..."
+              echo "Applying custom colors, branding, Collabora Office, and Notify Push..."
               kubectl exec -n {{ .Release.Namespace }} $POD_NAME -c nextcloud -- su -s /bin/bash www-data -c "
                 php occ theming:config name '{{ .Values.branding.name | default "Unity Drive" }}'
                 php occ theming:config slogan '{{ .Values.branding.slogan | default "Secure Enterprise Storage" }}'
@@ -60,9 +60,14 @@ spec:
                 php occ config:app:set richdocuments disable_certificate_verification --value='yes'
                 php occ richdocuments:activate-config
                 {{- end }}
+                {{- if .Values.notifyPush.enabled }}
+                echo 'Configuring Notify Push (WebSockets)...'
+                php occ app:enable --force notify_push 2>/dev/null || true
+                php occ notify_push:setup https://{{ .Values.domain.nextcloud | default "nextcloud.sengporkeat.com" }}/push 2>/dev/null || true
+                {{- end }}
                 php occ config:system:set overwriteprotocol --value='https'
                 php occ config:system:set overwritehost --value='{{ .Values.domain.nextcloud | default "nextcloud.sengporkeat.com" }}'
                 php occ config:system:set overwrite.cli.url --value='https://{{ .Values.domain.nextcloud | default "nextcloud.sengporkeat.com" }}'
                 php occ config:system:set trusted_proxies 0 --value='10.0.0.0/8'
               "
-              echo "Theming, clean experience, and Collabora Office applied successfully!"
+              echo "Theming, clean experience, and Notify Push applied successfully!"

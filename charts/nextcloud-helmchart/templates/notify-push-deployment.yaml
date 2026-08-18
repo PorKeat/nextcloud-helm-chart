@@ -1,0 +1,87 @@
+{{- if .Values.notifyPush.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-notify-push
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: notify-push
+spec:
+  replicas: {{ .Values.notifyPush.replicaCount | default 1 }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: notify-push
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: notify-push
+    spec:
+      hostAliases:
+        - ip: "10.233.40.36"
+          hostnames:
+            - "{{ .Values.domain.nextcloud | default "nextcloud.sengporkeat.com" }}"
+      containers:
+        - name: notify-push
+          image: "{{ .Values.notifyPush.image.repository }}:{{ .Values.notifyPush.image.tag }}"
+          imagePullPolicy: {{ .Values.notifyPush.image.pullPolicy | default "IfNotPresent" }}
+          env:
+            - name: PORT
+              value: "7867"
+            - name: NEXTCLOUD_URL
+              value: "https://{{ .Values.domain.nextcloud | default "nextcloud.sengporkeat.com" }}"
+            - name: REDIS_URL
+              value: "redis://:{{ .Values.redis.auth.password | default "RedisPassword@1234" }}@{{ .Release.Name }}-redis-master:6379"
+            - name: DATABASE_URL
+              value: "postgres://{{ .Values.database.username | default "admin" }}:{{ .Values.database.password | default "Admin@1234" }}@{{ .Release.Name }}-postgresql:5432/{{ .Values.database.database | default "nextcloud" }}"
+            - name: DATABASE_PREFIX
+              value: "oc_"
+            - name: ALLOW_SELF_SIGNED
+              value: "true"
+          ports:
+            - name: websocket
+              containerPort: 7867
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 20m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-notify-push
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: notify-push
+spec:
+  type: ClusterIP
+  ports:
+    - port: 7867
+      targetPort: 7867
+      protocol: TCP
+      name: websocket
+  selector:
+    app.kubernetes.io/name: notify-push
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ .Release.Name }}-notify-push-ingress
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: notify-push
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`{{ .Values.domain.nextcloud | default "nextcloud.sengporkeat.com" }}`) && PathPrefix(`/push`)
+      kind: Rule
+      services:
+        - name: {{ .Release.Name }}-notify-push
+          port: 7867
+  tls:
+    secretName: nextcloud-tls-secret
+{{- end }}

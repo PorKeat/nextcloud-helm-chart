@@ -90,7 +90,23 @@ redis:
         cpu: 50m
         memory: 64Mi
 
-# 8. Auto-Scaling (HPA)
+# 8. Notify Push (High Performance WebSockets Daemon)
+notifyPush:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: icewind1991/notify_push
+    tag: latest
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: 20m
+      memory: 32Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+# 9. Auto-Scaling (HPA)
 autoscaling:
   minReplicas: 1
   maxReplicas: 4

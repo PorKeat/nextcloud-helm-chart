@@ -40,6 +40,18 @@ redis:
         cpu: 50m
         memory: 64Mi
 
+# Notify Push (High Performance WebSockets Daemon)
+notifyPush:
+  enabled: true
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 20m
+      memory: 32Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
 # Collabora Online Office (Maximum Performance with Lightweight Base Request)
 collabora:
   replicaCount: 1
