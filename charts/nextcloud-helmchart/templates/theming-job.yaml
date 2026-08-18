@@ -1,0 +1,40 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-apply-theming-job
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: nextcloud-theming-job
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      volumes:
+        - name: assets-volume
+          configMap:
+            name: {{ .Release.Name }}-custom-assets
+      containers:
+        - name: theming-applier
+          image: bitnami/kubectl:latest
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "Waiting for Nextcloud pod to be ready..."
+              kubectl wait --for=condition=Ready pod -l app.kubernetes.io/name=nextcloud -n {{ .Release.Namespace }} --timeout=300s
+              POD_NAME=$(kubectl get pod -l app.kubernetes.io/name=nextcloud -n {{ .Release.Namespace }} -o jsonpath='{.items[0].metadata.name}')
+              echo "Applying custom colors and branding..."
+              kubectl exec -n {{ .Release.Namespace }} $POD_NAME -c nextcloud -- su -s /bin/bash www-data -c "
+                php occ config:app:set theming name --value='{{ .Values.branding.name | default "Kubesquare Cloud" }}'
+                php occ config:app:set theming slogan --value='{{ .Values.branding.slogan | default "Secure Enterprise Storage" }}'
+                php occ config:app:set theming color --value='{{ .Values.branding.primaryColor | default "#7D54D3" }}'
+                php occ config:app:set theming background_color --value='{{ .Values.branding.backgroundColor | default "#000000" }}'
+                php occ config:system:set overwriteprotocol --value='https'
+                php occ config:system:set overwritehost --value='{{ .Values.domain.nextcloud | default "nextcloud.sengporkeat.com" }}'
+                php occ config:system:set overwrite.cli.url --value='https://{{ .Values.domain.nextcloud | default "nextcloud.sengporkeat.com" }}'
+                php occ config:system:set trusted_proxies 0 --value='10.0.0.0/8'
+              "
+              echo "Theming applied successfully!"
