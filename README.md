@@ -16,22 +16,6 @@ A production-ready Umbrella Helm Chart and Kustomize package for deploying Nextc
 
 ---
 
-## Security & Git Best Practices (What NOT to push to Git)
-
-The included `.gitignore` protects your repository from accidentally committing sensitive files or large binaries:
-
-1. **Secrets & Production Passwords**:
-   * Never commit real administrator passwords or MinIO access keys.
-   * Put private production overrides in `*.secret.yaml` or `*.local.yaml` (automatically ignored by `.gitignore`).
-2. **Certificates & Private Keys**:
-   * All `*.key`, `*.pem`, `*.crt`, and `*.p12` files are ignored. Let `cert-manager` handle certificate generation inside the cluster.
-3. **Helm Dependency Archives**:
-   * All `charts/*.tgz` packaged archives are ignored. Use `helm dependency build` locally or in CI/CD pipelines.
-4. **OS and Editor Junk**:
-   * `.DS_Store`, `.vscode/`, and `.idea/` are ignored.
-
----
-
 ## MinIO S3 Object Storage (Dual Mode Selection)
 
 You can choose whether Helm should deploy a brand-new MinIO instance or connect to an existing hosted S3 / MinIO cluster:
@@ -108,7 +92,7 @@ database:
 ```text
 nextcloud-helmchart/
 ├── README.md                           # Documentation & deployment instructions
-├── .gitignore                          # Clean repository ignore file (secrets, certs, tarballs)
+├── .gitignore                          # Clean repository ignore file
 │
 ├── charts/
 │   └── nextcloud-helmchart/
