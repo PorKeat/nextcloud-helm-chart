@@ -29,7 +29,7 @@ spec:
                 - MKNOD
           env:
             - name: domain
-              value: "{{ .Values.domain.nextcloud | default "nextcloud.sengporkeat.com" | replace "." "\\." }}"
+              value: "{{ .Values.domain.nextcloud | default "nextcloud.sengporkeat.com" }}"
             - name: aliasgroup1
               value: "https://{{ .Values.domain.nextcloud | default "nextcloud.sengporkeat.com" }}"
             - name: server_name
