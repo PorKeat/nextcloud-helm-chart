@@ -83,7 +83,7 @@ collabora:
 collaboraHPA:
   enabled: true
   minReplicas: 2
-  maxReplicas: 3
+  maxReplicas: 6
 
 nextcloud:
   replicaCount: 2
@@ -115,7 +115,7 @@ nextcloud:
 nextcloudHPA:
   enabled: true
   minReplicas: 2
-  maxReplicas: 3
+  maxReplicas: 6
 
 # ------------------------------------------------------------------------------
 # MINIO S3 OBJECT STORAGE
