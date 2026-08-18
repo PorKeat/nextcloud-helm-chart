@@ -57,6 +57,17 @@ previewGenerator:
   enabled: true
   schedule: "*/15 * * * *"             # Runs background pre-rendering every 15 minutes
 
+# ClamAV Antivirus Daemon (Real-time File Inspection & Ransomware Blocking)
+clamav:
+  enabled: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1.5Gi
+
 # Collabora Online Office (Maximum Performance with Lightweight Base Request)
 collabora:
   replicaCount: 1

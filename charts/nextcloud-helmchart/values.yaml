@@ -111,7 +111,22 @@ previewGenerator:
   enabled: true
   schedule: "*/15 * * * *"             # Runs background pre-rendering every 15 minutes
 
-# 10. Auto-Scaling (HPA)
+# 10. ClamAV Antivirus Daemon (Real-time File Inspection & Ransomware Blocking)
+clamav:
+  enabled: true
+  image:
+    repository: clamav/clamav
+    tag: latest
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1.5Gi
+
+# 11. Auto-Scaling (HPA)
 autoscaling:
   minReplicas: 1
   maxReplicas: 4

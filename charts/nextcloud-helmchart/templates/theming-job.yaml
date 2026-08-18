@@ -11,6 +11,7 @@ metadata:
 spec:
   template:
     spec:
+      serviceAccountName: {{ .Release.Name }}-admin-sa
       restartPolicy: OnFailure
       volumes:
         - name: assets-volume
@@ -26,7 +27,7 @@ spec:
               echo "Waiting for Nextcloud pod to be ready..."
               kubectl wait --for=condition=Ready pod -l app.kubernetes.io/name=nextcloud -n {{ .Release.Namespace }} --timeout=300s
               POD_NAME=$(kubectl get pod -l app.kubernetes.io/name=nextcloud -n {{ .Release.Namespace }} -o jsonpath='{.items[0].metadata.name}')
-              echo "Applying custom colors, branding, Collabora Office, and Notify Push..."
+              echo "Applying custom colors, branding, Collabora Office, and Antivirus..."
               kubectl exec -n {{ .Release.Namespace }} $POD_NAME -c nextcloud -- su -s /bin/bash www-data -c "
                 php occ theming:config name '{{ .Values.branding.name | default "Unity Drive" }}'
                 php occ theming:config slogan '{{ .Values.branding.slogan | default "Secure Enterprise Storage" }}'
@@ -68,14 +69,27 @@ spec:
                 {{- if .Values.previewGenerator.enabled }}
                 echo 'Configuring Preview Generator app...'
                 if [ ! -d /var/www/html/apps/previewgenerator ]; then
-                  curl -L -s https://github.com/nextcloud/previewgenerator/releases/download/v5.5.0/previewgenerator.tar.gz -o /tmp/previewgenerator.tar.gz
+                  curl -k -L -s https://github.com/nextcloud-releases/previewgenerator/releases/download/v5.14.0/previewgenerator-v5.14.0.tar.gz -o /tmp/previewgenerator.tar.gz
                   tar -xzf /tmp/previewgenerator.tar.gz -C /var/www/html/apps/
                 fi
                 php occ app:enable --force previewgenerator 2>/dev/null || true
+                {{- end }}
+                {{- if .Values.clamav.enabled }}
+                echo 'Configuring ClamAV Antivirus (files_antivirus)...'
+                if [ ! -d /var/www/html/apps/files_antivirus ]; then
+                  curl -k -L -s https://github.com/nextcloud-releases/files_antivirus/releases/download/v6.4.0/files_antivirus-v6.4.0.tar.gz -o /tmp/files_antivirus.tar.gz
+                  tar -xzf /tmp/files_antivirus.tar.gz -C /var/www/html/apps/
+                fi
+                php occ app:enable --force files_antivirus 2>/dev/null || true
+                php occ config:app:set files_antivirus av_mode --value='daemon'
+                php occ config:app:set files_antivirus av_host --value='{{ .Release.Name }}-clamav'
+                php occ config:app:set files_antivirus av_port --value='3310'
+                php occ config:app:set files_antivirus av_stream_max_size --value='104857600'
+                php occ config:app:set files_antivirus av_infected_action --value='delete'
                 {{- end }}
                 php occ config:system:set overwriteprotocol --value='https'
                 php occ config:system:set overwritehost --value='{{ .Values.domain.nextcloud | default "nextcloud.sengporkeat.com" }}'
                 php occ config:system:set overwrite.cli.url --value='https://{{ .Values.domain.nextcloud | default "nextcloud.sengporkeat.com" }}'
                 php occ config:system:set trusted_proxies 0 --value='10.0.0.0/8'
               "
-              echo "Theming, clean experience, and Preview Generator applied successfully!"
+              echo "Theming, clean experience, and security applied successfully!"
