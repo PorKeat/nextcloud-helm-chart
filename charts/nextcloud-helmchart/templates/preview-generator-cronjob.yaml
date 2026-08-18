@@ -9,7 +9,7 @@ metadata:
 spec:
   schedule: "{{ .Values.previewGenerator.schedule | default "*/15 * * * *" }}"
   concurrencyPolicy: Forbid
-  successfulJobsHistoryLimit: 1
+  successfulJobsHistoryLimit: 0
   failedJobsHistoryLimit: 1
   jobTemplate:
     spec:
