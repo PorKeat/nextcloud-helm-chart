@@ -30,9 +30,14 @@ data:
       'preview_concurrency_new' => 4,
       'preview_concurrency_all' => 8,
       
-      'filesystem_check_changes' => 0,       // Skip checking local disk changes (files managed in S3/DB)
+      'filesystem_check_changes' => 0,
       'filelocking.ttl' => 3600,
       'session_lifetime' => 86400,
       'auth.bruteforce.protection.enabled' => true,
       'simpleSignUpLink.shown' => false,
+
+      // Instant Setup Check Resolution
+      'has_internet_connection' => false,
+      'check_for_working_wellknown_setup' => false,
+      'check_for_working_htaccess' => false,
     ];
