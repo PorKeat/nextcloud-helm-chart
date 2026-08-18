@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-performance-tuning
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "nextcloud-helmchart.labels" . | nindent 4 }}
+data:
+  tuning.config.php: |
+    <?php
+    $CONFIG = [
+      'memcache.local' => '\OC\Memcache\APCu',
+      'memcache.distributed' => '\OC\Memcache\Redis',
+      'memcache.locking' => '\OC\Memcache\Redis',
+      'redis' => [
+        'host' => '{{ .Release.Name }}-redis-master',
+        'port' => 6379,
+        'password' => '{{ .Values.redis.auth.password | default "RedisPassword@1234" }}',
+        'timeout' => 1.5,
+      ],
+      'default_phone_region' => 'US',
+      'maintenance_window_start' => 1,
+    ];

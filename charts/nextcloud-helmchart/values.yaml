@@ -119,6 +119,9 @@ nextcloud:
       - name: theming-config
         configMap:
           name: nextcloud-theming-config
+      - name: performance-config
+        configMap:
+          name: nextcloud-performance-tuning
     extraVolumeMounts:
       - name: collabora-config
         mountPath: /var/www/html/config/collabora.config.php
@@ -129,6 +132,9 @@ nextcloud:
       - name: theming-config
         mountPath: /var/www/html/config/theming.config.php
         subPath: theming.config.php
+      - name: performance-config
+        mountPath: /var/www/html/config/tuning.config.php
+        subPath: tuning.config.php
 
     objectStore:
       s3:
