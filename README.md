@@ -7,56 +7,84 @@ A production-grade Umbrella Helm Chart and Kustomize package for deploying Nextc
 ## 🏛️ Infrastructure Architecture (Mermaid Diagram)
 
 ```mermaid
-flowchart TD
-    User(["🌐 Client / Browser / Desktop & Mobile App"])
+flowchart TB
+    %% ==========================================
+    %% CLIENT & TRAFFIC ENTRY
+    %% ==========================================
+    User(["🌐 Client Apps & Browsers\n(Web, Desktop, iOS, Android)"]):::clientNode
 
-    subgraph Edge ["🛡️ Ingress & Edge Routing (Traefik Gateway)"]
-        Traefik["Traefik Ingress Controller\n(Port 80/443 + Let's Encrypt TLS)"]
-        SecHeaders["Middleware: Security Headers\n(HSTS 31536000s, Nosniff, SAMEORIGIN)"]
-        DAVRewrites["Middleware: Regex Rewrites\n(CalDAV, CardDAV, WebFinger, NodeInfo)"]
-        Traefik --- SecHeaders
-        Traefik --- DAVRewrites
-    end
-
-    subgraph CoreStack ["☁️ Kubernetes Namespace: nextcloud-system"]
-        subgraph AppLayer ["Web & Application Workloads"]
-            NC["Nextcloud Pod (PHP 8.5 / Apache)\n• OPcache 256MB / 30k files\n• APCu In-Memory Cache\n• Theme: Unity Drive"]
-            Collabora["Collabora Online Office (CODE)\n• Jailed Bind Mounting (SYS_ADMIN)\n• Warm Pre-spawned Children (2)\n• Hardware Concurrency (2 Cores)"]
-            Push["Notify Push Daemon (Rust)\n• Persistent WebSocket Stream (/push)\n• Instant File & Chat UI Sync"]
-            ClamAV["ClamAV Antivirus Daemon\n• Real-Time File Stream Inspection\n• Auto Freshclam Virus Definitions"]
-            Cron["Preview Generator CronJob\n• Pre-renders High-Res Thumbnails\n• 60 FPS Fluid Gallery Scrolling"]
-        end
-
-        subgraph DataLayer ["Stateful & Caching Infrastructure"]
-            Redis["Redis Master (Standalone)\n• Distributed Locks & Memcache\n• Pub/Sub for WebSockets"]
-            Postgres["PostgreSQL 17 Primary\n• Relational Metadata Storage\n• Persistent Longhorn Volume (8Gi)"]
-            MinIO["MinIO S3 Object Storage\n• Primary File Storage (nextcloud-data)\n• Persistent Longhorn Volume (20Gi)"]
+    %% ==========================================
+    %% INGRESS & EDGE ROUTING
+    %% ==========================================
+    subgraph IngressGateway ["  🛡️ Traefik Ingress Gateway (Edge TLS / Router)  "]
+        direction TB
+        Traefik["Traefik Ingress Controller\n(Port 80/443 + Let's Encrypt TLS)"]:::ingressNode
+        
+        subgraph Middlewares [" Traefik Security & Routing Middlewares "]
+            SecHeaders["🔒 A+ Security Headers\n• HSTS (31536000s, preload)\n• X-Frame: SAMEORIGIN\n• X-Content-Type: nosniff"]:::midNode
+            Rewrites["🔀 Endpoint Rewrites\n• /.well-known/(caldav|carddav)\n• /.well-known/(webfinger|nodeinfo)"]:::midNode
         end
     end
 
-    %% User Ingress Traffic
-    User -->|"HTTPS / HTTP2"| Traefik
+    %% ==========================================
+    %% CORE SERVICES
+    %% ==========================================
+    subgraph KubernetesCluster ["  ☁️ Kubernetes Cluster (Namespace: nextcloud-system)  "]
+        
+        subgraph AppTier [" 📱 Application & Microservices Layer "]
+            NC["💻 Nextcloud Core (PHP 8.5 / Apache)\n• OPcache 256MB / 30,000 files\n• In-Memory APCu & Redis Cache\n• Theme: Unity Drive"]:::ncNode
+            Collabora["📄 Collabora Office (CODE)\n• Jailed Bind Mounts (SYS_ADMIN)\n• Warm Workers (num_prespawn=2)\n• Hardware Concurrency (2 Threads)"]:::officeNode
+            NotifyPush["⚡ Notify Push Daemon (Rust)\n• Persistent WebSocket Stream\n• Instant 0ms Sync & Notifications"]:::pushNode
+            ClamAV["🛡️ ClamAV Antivirus Daemon\n• Real-Time File Stream Scanning\n• Auto-Updated Virus Signatures"]:::secNode
+            PreviewCron["🖼️ Preview Generator (CronJob)\n• Pre-renders High-Res Images (15m)\n• 60 FPS Fluid Gallery Scrolling"]:::cronNode
+        end
+
+        subgraph StorageTier [" 💾 Persistent Storage & Caching Layer "]
+            Redis["⚡ Redis Master Cache\n• Distributed Session & File Locking\n• Real-Time Pub/Sub Message Bus"]:::redisNode
+            Postgres["🐘 PostgreSQL 17 Primary\n• Relational Application Metadata\n• 8Gi Longhorn Replicated Volume"]:::dbNode
+            MinIO["📦 MinIO S3 Object Storage\n• Primary File Storage (nextcloud-data)\n• 20Gi Longhorn Replicated Volume"]:::s3Node
+        end
+
+    end
+
+    %% ==========================================
+    %% TRAFFIC ROUTING EDGES
+    %% ==========================================
+    User ==>|"HTTPS / TLS 1.3"| Traefik
+    Traefik --- SecHeaders
+    Traefik --- Rewrites
+
     Traefik -->|"Path: /"| NC
-    Traefik -->|"Path: /push (WebSocket Upgrade)"| Push
+    Traefik -->|"Path: /push (WS Upgrade)"| NotifyPush
     Traefik -->|"Host: office.sengporkeat.com"| Collabora
     Traefik -->|"Host: minio.sengporkeat.com"| MinIO
 
-    %% Internal Communication & Protocols
-    NC <-->|"TCP 6379 (Locking & Caching)"| Redis
-    NC <-->|"TCP 5432 (SQL Queries)"| Postgres
+    %% ==========================================
+    %% SERVICE-TO-SERVICE INTERACTIONS
+    %% ==========================================
+    NC <-->|"TCP 6379 (Locks / Cache)"| Redis
+    NC <-->|"TCP 5432 (SQL)"| Postgres
     NC <-->|"S3 API (Port 9000)"| MinIO
     NC <-->|"WOPI Protocol (Port 9980)"| Collabora
     NC -->|"TCP 3310 (Real-Time File Scan)"| ClamAV
-    Push <-->|"Pub/Sub Updates"| Redis
-    Push <-->|"Direct DB Queries"| Postgres
-    Cron -.->|"Executes 'preview:pre-generate' (Every 15m)"| NC
+    NotifyPush <-->|"Pub/Sub Stream"| Redis
+    NotifyPush <-->|"Auth & Queries"| Postgres
+    PreviewCron -.->|"Executes 'preview:pre-generate'"| NC
 
-    classDef edge fill:#326ce5,stroke:#fff,stroke-width:2px,color:#fff;
-    classDef app fill:#7D54D3,stroke:#fff,stroke-width:2px,color:#fff;
-    classDef storage fill:#008080,stroke:#fff,stroke-width:2px,color:#fff;
-    class Traefik,SecHeaders,DAVRewrites edge;
-    class NC,Collabora,Push,ClamAV,Cron app;
-    class Redis,Postgres,MinIO storage;
+    %% ==========================================
+    %% COLOR SCHEMES & STYLES
+    %% ==========================================
+    classDef clientNode fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#f8fafc;
+    classDef ingressNode fill:#0284c7,stroke:#bae6fd,stroke-width:2px,color:#ffffff;
+    classDef midNode fill:#0369a1,stroke:#7dd3fc,stroke-width:1px,color:#ffffff;
+    classDef ncNode fill:#7c3aed,stroke:#ddd6fe,stroke-width:2px,color:#ffffff;
+    classDef officeNode fill:#059669,stroke:#a7f3d0,stroke-width:2px,color:#ffffff;
+    classDef pushNode fill:#d97706,stroke:#fde68a,stroke-width:2px,color:#ffffff;
+    classDef secNode fill:#dc2626,stroke:#fecaca,stroke-width:2px,color:#ffffff;
+    classDef cronNode fill:#4f46e5,stroke:#c7d2fe,stroke-width:2px,color:#ffffff;
+    classDef redisNode fill:#b91c1c,stroke:#fca5a5,stroke-width:2px,color:#ffffff;
+    classDef dbNode fill:#1d4ed8,stroke:#bfdbfe,stroke-width:2px,color:#ffffff;
+    classDef s3Node fill:#0f766e,stroke:#99f6e4,stroke-width:2px,color:#ffffff;
 ```
 
 ---
