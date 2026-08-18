@@ -36,5 +36,10 @@ data:
       'auth.bruteforce.protection.enabled' => true,
       'simpleSignUpLink.shown' => false,
       'backgroundjobs_mode' => 'cron',
-      'has_internet_connection' => false,
+      'has_internet_connection' => true,
+      'connectivity_check_domains' => [
+          'www.google.com',
+          'www.cloudflare.com',
+          'www.github.com'
+      ],
     ];
