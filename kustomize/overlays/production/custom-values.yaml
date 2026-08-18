@@ -29,13 +29,13 @@ database:
 mariadb:
   enabled: false
 
-# Redis (Allow custom image)
+# Redis (Official Bitnami Redis)
 redis:
   enabled: true
   image:
     registry: docker.io
-    repository: bitnamicharts/redis
-    tag: 7.4.2-debian-12-r0
+    repository: bitnami/redis
+    tag: latest
   auth:
     enabled: true
     password: "RedisPassword@1234"
