@@ -93,7 +93,7 @@ redis:
 # 8. Auto-Scaling (HPA)
 autoscaling:
   minReplicas: 1
-  maxReplicas: 6
+  maxReplicas: 4
   nextcloudTargetCPU: 70
   collaboraTargetCPU: 75
 
@@ -174,8 +174,8 @@ nextcloud:
         usePathStyle: true
     resources:
       requests:
-        cpu: 250m
-        memory: 512Mi
+        cpu: 100m
+        memory: 256Mi
       limits:
         cpu: 2000m
         memory: 2Gi
@@ -187,7 +187,7 @@ nextcloud:
       cert-manager.io/cluster-issuer: letsencrypt-prod
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
       traefik.ingress.kubernetes.io/router.tls: "true"
-      traefik.ingress.kubernetes.io/router.middlewares: nextcloud-system-nextcloud-security-headers@kubernetescrd,nextcloud-system-nextcloud-redirect-dav@kubernetescrd
+      traefik.ingress.kubernetes.io/router.middlewares: nextcloud-system-nextcloud-security-headers@kubernetescrd,nextcloud-system-nextcloud-redirect-dav@kubernetescrd,nextcloud-system-nextcloud-redirect-wellknown@kubernetescrd
     path: /
     pathType: Prefix
     tls:
@@ -251,7 +251,7 @@ nextcloud:
 nextcloudHPA:
   enabled: true
   minReplicas: 1
-  maxReplicas: 6
+  maxReplicas: 4
   targetCPUUtilizationPercentage: 70
   targetMemoryUtilizationPercentage: 80
 
@@ -276,8 +276,8 @@ collabora:
       value: "en_US"
   resources:
     requests:
-      cpu: 250m
-      memory: 512Mi
+      cpu: 100m
+      memory: 256Mi
     limits:
       cpu: 2000m
       memory: 3Gi
@@ -296,5 +296,5 @@ collabora:
 collaboraHPA:
   enabled: true
   minReplicas: 1
-  maxReplicas: 6
+  maxReplicas: 4
   targetCPUUtilizationPercentage: 75

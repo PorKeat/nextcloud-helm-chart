@@ -28,3 +28,16 @@ spec:
     permanent: true
     regex: "^https://(.*)/\\.well-known/(card|cal)dav"
     replacement: "https://${1}/remote.php/dav/"
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ .Release.Name }}-redirect-wellknown
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "nextcloud-helmchart.labels" . | nindent 4 }}
+spec:
+  redirectRegex:
+    permanent: true
+    regex: "^https://(.*)/\\.well-known/(webfinger|nodeinfo)"
+    replacement: "https://${1}/index.php/.well-known/${2}"
