@@ -42,9 +42,17 @@ spec:
                 {{- if .Values.features.disableSkeletonDirectory }}
                 php occ config:system:set skeletondirectory --value=''
                 {{- end }}
+                {{- if .Values.collabora.enabled }}
+                echo 'Installing and activating Nextcloud Office (richdocuments) for Collabora...'
+                php occ app:install richdocuments || php occ app:enable richdocuments
+                php occ config:app:set richdocuments wopi_url --value='https://{{ .Values.domain.collabora | default .Values.collabora.domain }}'
+                php occ config:app:set richdocuments public_wopi_url --value='https://{{ .Values.domain.collabora | default .Values.collabora.domain }}'
+                php occ config:app:set richdocuments disable_certificate_verification --value='yes'
+                php occ richdocuments:activate-config
+                {{- end }}
                 php occ config:system:set overwriteprotocol --value='https'
                 php occ config:system:set overwritehost --value='{{ .Values.domain.nextcloud | default "nextcloud.sengporkeat.com" }}'
                 php occ config:system:set overwrite.cli.url --value='https://{{ .Values.domain.nextcloud | default "nextcloud.sengporkeat.com" }}'
                 php occ config:system:set trusted_proxies 0 --value='10.0.0.0/8'
               "
-              echo "Theming & clean experience applied successfully!"
+              echo "Theming, clean experience, and Collabora Office applied successfully!"
