@@ -12,7 +12,7 @@ spec:
   storageClassName: {{ .Values.minio.storageClass | default "longhorn" }}
   resources:
     requests:
-      storage: {{ .Values.minio.storageSize | default "20Gi" }}
+      storage: {{ .Values.minio.storageSize | default "10Gi" }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -118,33 +118,4 @@ spec:
                 name: {{ .Release.Name }}-minio
                 port:
                   number: 9000
----
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: {{ .Release.Name }}-minio-create-bucket
-  namespace: {{ .Release.Namespace }}
-  labels:
-    app.kubernetes.io/name: minio-bucket-creator
-  annotations:
-    "helm.sh/hook": post-install,post-upgrade
-    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
-spec:
-  template:
-    spec:
-      restartPolicy: OnFailure
-      containers:
-        - name: mc
-          image: minio/mc:latest
-          command:
-            - /bin/sh
-            - -c
-            - |
-              echo "Waiting for MinIO server to start..."
-              until mc alias set local http://{{ .Release.Name }}-minio:9000 {{ .Values.minio.accessKey | default "admin" }} {{ .Values.minio.secretKey | default "Admin@1234" }}; do
-                sleep 2
-              done
-              echo "Creating bucket {{ .Values.minio.bucket | default "nextcloud-data" }} if it does not exist..."
-              mc mb --ignore-existing local/{{ .Values.minio.bucket | default "nextcloud-data" }}
-              echo "Bucket ready!"
 {{- end }}
