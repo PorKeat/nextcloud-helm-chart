@@ -27,73 +27,72 @@ data:
     if [ -f /var/www/html/config/config.php ]; then
       echo "[Auto-Setup Hook] Applying theming, branding, Collabora, and Antivirus..."
       
-      su -s /bin/bash www-data -c "
-        php occ theming:config name '{{ .Values.branding.name | default "Unity Drive" }}' 2>/dev/null || true
-        php occ theming:config slogan '{{ .Values.branding.slogan | default "Secure Enterprise Storage" }}' 2>/dev/null || true
-        php occ theming:config primary_color '{{ .Values.branding.primaryColor | default "#7D54D3" }}' 2>/dev/null || true
-        php occ theming:config background_color '{{ .Values.branding.backgroundColor | default "#000000" }}' 2>/dev/null || true
-        php occ maintenance:theme:update 2>/dev/null || true
-        
-        {{- if .Values.features.disableAds }}
-        php occ app:disable firstrunwizard 2>/dev/null || true
-        php occ app:disable recommendations 2>/dev/null || true
-        php occ app:disable updatenotification 2>/dev/null || true
-        php occ app:disable survey_client 2>/dev/null || true
-        {{- end }}
-        
-        {{- if .Values.features.disableSkeletonDirectory }}
-        php occ config:system:set skeletondirectory --value='' 2>/dev/null || true
-        {{- end }}
-        
-        {{- if .Values.collabora.enabled }}
-        if [ ! -d /var/www/html/apps/richdocuments ]; then
-          curl -L -s https://github.com/nextcloud-releases/richdocuments/releases/download/v11.1.0/richdocuments-v11.1.0.tar.gz -o /tmp/richdocuments.tar.gz
-          tar -xzf /tmp/richdocuments.tar.gz -C /var/www/html/apps/
-        fi
-        php occ app:enable --force richdocuments 2>/dev/null || true
-        php occ config:app:set richdocuments wopi_url --value='http://{{ .Release.Name }}-collabora:9980' 2>/dev/null || true
-        php occ config:app:set richdocuments public_wopi_url --value='https://{{ .Values.domain.collabora | default .Values.collabora.domain }}' 2>/dev/null || true
-        php occ config:app:set richdocuments wopi_override_endpoint --value='https://{{ .Values.domain.collabora | default .Values.collabora.domain }}' 2>/dev/null || true
-        php occ config:app:set richdocuments wopi_allowlist --value='0.0.0.0/0' 2>/dev/null || true
-        {{- if .Values.features.disableAuditWarning }}
-        php occ config:app:set richdocuments disable_audit_warning --value='yes' 2>/dev/null || true
-        {{- end }}
-        php occ config:system:set allow_local_remote_servers --value=true --type=boolean 2>/dev/null || true
-        php occ config:app:set richdocuments disable_certificate_verification --value='yes' 2>/dev/null || true
-        php occ richdocuments:activate-config 2>/dev/null || true
-        {{- end }}
-        
-        {{- if .Values.notifyPush.enabled }}
-        php occ app:enable --force notify_push 2>/dev/null || true
-        php occ notify_push:setup https://{{ .Values.domain.nextcloud | default "nextcloud.sengporkeat.com" }}/push 2>/dev/null || true
-        {{- end }}
-        
-        {{- if .Values.previewGenerator.enabled }}
-        if [ ! -d /var/www/html/apps/previewgenerator ]; then
-          curl -k -L -s https://github.com/nextcloud-releases/previewgenerator/releases/download/v5.14.0/previewgenerator-v5.14.0.tar.gz -o /tmp/previewgenerator.tar.gz
-          tar -xzf /tmp/previewgenerator.tar.gz -C /var/www/html/apps/
-        fi
-        php occ app:enable --force previewgenerator 2>/dev/null || true
-        {{- end }}
-        
-        {{- if .Values.clamav.enabled }}
-        if [ ! -d /var/www/html/apps/files_antivirus ]; then
-          curl -k -L -s https://github.com/nextcloud-releases/files_antivirus/releases/download/v6.4.0/files_antivirus-v6.4.0.tar.gz -o /tmp/files_antivirus.tar.gz
-          tar -xzf /tmp/files_antivirus.tar.gz -C /var/www/html/apps/
-        fi
-        php occ app:enable --force files_antivirus 2>/dev/null || true
-        php occ config:app:set files_antivirus av_mode --value='daemon' 2>/dev/null || true
-        php occ config:app:set files_antivirus av_host --value='{{ .Release.Name }}-clamav' 2>/dev/null || true
-        php occ config:app:set files_antivirus av_port --value='3310' 2>/dev/null || true
-        php occ config:app:set files_antivirus av_stream_max_size --value='104857600' 2>/dev/null || true
-        php occ config:app:set files_antivirus av_infected_action --value='delete' 2>/dev/null || true
-        {{- end }}
-        
-        php occ config:system:set overwriteprotocol --value='https' 2>/dev/null || true
-        php occ config:system:set overwritehost --value='{{ .Values.domain.nextcloud | default "nextcloud.sengporkeat.com" }}' 2>/dev/null || true
-        php occ config:system:set overwrite.cli.url --value='https://{{ .Values.domain.nextcloud | default "nextcloud.sengporkeat.com" }}' 2>/dev/null || true
-        php occ config:system:set trusted_proxies 0 --value='10.0.0.0/8' 2>/dev/null || true
-      "
+      php /var/www/html/occ theming:config name '{{ .Values.branding.name | default "Unity Drive" }}' 2>/dev/null || true
+      php /var/www/html/occ theming:config slogan '{{ .Values.branding.slogan | default "Secure Enterprise Storage" }}' 2>/dev/null || true
+      php /var/www/html/occ theming:config primary_color '{{ .Values.branding.primaryColor | default "#7D54D3" }}' 2>/dev/null || true
+      php /var/www/html/occ theming:config background_color '{{ .Values.branding.backgroundColor | default "#000000" }}' 2>/dev/null || true
+      php /var/www/html/occ maintenance:theme:update 2>/dev/null || true
+      
+      {{- if .Values.features.disableAds }}
+      php /var/www/html/occ app:disable firstrunwizard 2>/dev/null || true
+      php /var/www/html/occ app:disable recommendations 2>/dev/null || true
+      php /var/www/html/occ app:disable updatenotification 2>/dev/null || true
+      php /var/www/html/occ app:disable survey_client 2>/dev/null || true
+      {{- end }}
+      
+      {{- if .Values.features.disableSkeletonDirectory }}
+      php /var/www/html/occ config:system:set skeletondirectory --value='' 2>/dev/null || true
+      {{- end }}
+      
+      {{- if .Values.collabora.enabled }}
+      if [ ! -d /var/www/html/apps/richdocuments ]; then
+        curl -L -s https://github.com/nextcloud-releases/richdocuments/releases/download/v11.1.0/richdocuments-v11.1.0.tar.gz -o /tmp/richdocuments.tar.gz
+        tar -xzf /tmp/richdocuments.tar.gz -C /var/www/html/apps/
+      fi
+      php /var/www/html/occ app:enable --force richdocuments 2>/dev/null || true
+      php /var/www/html/occ config:app:set richdocuments wopi_url --value='http://{{ .Release.Name }}-collabora:9980' 2>/dev/null || true
+      php /var/www/html/occ config:app:set richdocuments public_wopi_url --value='https://{{ .Values.domain.collabora | default .Values.collabora.domain }}' 2>/dev/null || true
+      php /var/www/html/occ config:app:set richdocuments wopi_override_endpoint --value='https://{{ .Values.domain.collabora | default .Values.collabora.domain }}' 2>/dev/null || true
+      php /var/www/html/occ config:app:set richdocuments wopi_allowlist --value='0.0.0.0/0' 2>/dev/null || true
+      {{- if .Values.features.disableAuditWarning }}
+      php /var/www/html/occ config:app:set richdocuments disable_audit_warning --value='yes' 2>/dev/null || true
+      {{- end }}
+      php /var/www/html/occ config:system:set allow_local_remote_servers --value=true --type=boolean 2>/dev/null || true
+      php /var/www/html/occ config:app:set richdocuments disable_certificate_verification --value='yes' 2>/dev/null || true
+      php /var/www/html/occ richdocuments:activate-config 2>/dev/null || true
+      {{- end }}
+      
+      {{- if .Values.notifyPush.enabled }}
+      php /var/www/html/occ app:enable --force notify_push 2>/dev/null || true
+      php /var/www/html/occ notify_push:setup https://{{ .Values.domain.nextcloud | default "nextcloud.sengporkeat.com" }}/push 2>/dev/null || true
+      {{- end }}
+      
+      {{- if .Values.previewGenerator.enabled }}
+      if [ ! -d /var/www/html/apps/previewgenerator ]; then
+        curl -k -L -s https://github.com/nextcloud-releases/previewgenerator/releases/download/v5.14.0/previewgenerator-v5.14.0.tar.gz -o /tmp/previewgenerator.tar.gz
+        tar -xzf /tmp/previewgenerator.tar.gz -C /var/www/html/apps/
+      fi
+      php /var/www/html/occ app:enable --force previewgenerator 2>/dev/null || true
+      {{- end }}
+      
+      {{- if .Values.clamav.enabled }}
+      if [ ! -d /var/www/html/apps/files_antivirus ]; then
+        curl -k -L -s https://github.com/nextcloud-releases/files_antivirus/releases/download/v6.4.0/files_antivirus-v6.4.0.tar.gz -o /tmp/files_antivirus.tar.gz
+        tar -xzf /tmp/files_antivirus.tar.gz -C /var/www/html/apps/
+      fi
+      php /var/www/html/occ app:enable --force files_antivirus 2>/dev/null || true
+      php /var/www/html/occ config:app:set files_antivirus av_mode --value='daemon' 2>/dev/null || true
+      php /var/www/html/occ config:app:set files_antivirus av_host --value='{{ .Release.Name }}-clamav' 2>/dev/null || true
+      php /var/www/html/occ config:app:set files_antivirus av_port --value='3310' 2>/dev/null || true
+      php /var/www/html/occ config:app:set files_antivirus av_stream_max_size --value='104857600' 2>/dev/null || true
+      php /var/www/html/occ config:app:set files_antivirus av_infected_action --value='delete' 2>/dev/null || true
+      {{- end }}
+      
+      php /var/www/html/occ config:system:set overwriteprotocol --value='https' 2>/dev/null || true
+      php /var/www/html/occ config:system:set overwritehost --value='{{ .Values.domain.nextcloud | default "nextcloud.sengporkeat.com" }}' 2>/dev/null || true
+      php /var/www/html/occ config:system:set overwrite.cli.url --value='https://{{ .Values.domain.nextcloud | default "nextcloud.sengporkeat.com" }}' 2>/dev/null || true
+      php /var/www/html/occ config:system:set trusted_proxies 0 --value='10.0.0.0/8' 2>/dev/null || true
+      
       echo "[Auto-Setup Hook] Direct in-pod configuration applied successfully!"
     fi
 ---
