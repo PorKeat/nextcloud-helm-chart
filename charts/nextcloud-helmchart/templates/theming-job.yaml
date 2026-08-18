@@ -50,9 +50,12 @@ spec:
                 fi
                 php occ app:enable --force richdocuments
                 php occ config:app:set richdocuments wopi_url --value='http://{{ .Release.Name }}-collabora:9980'
+                php occ config:app:set richdocuments wopi_override_endpoint --value='https://{{ .Values.domain.collabora | default .Values.collabora.domain }}'
                 php occ config:app:set richdocuments public_wopi_url --value='https://{{ .Values.domain.collabora | default .Values.collabora.domain }}'
+                php occ config:app:set richdocuments wopi_allowlist --value='10.0.0.0/8,10.233.0.0/16,10.148.0.0/16,127.0.0.1'
                 php occ config:system:set allow_local_remote_servers --value=true --type=boolean
                 php occ config:app:set richdocuments disable_certificate_verification --value='yes'
+                php occ richdocuments:activate-config
                 {{- end }}
                 php occ config:system:set overwriteprotocol --value='https'
                 php occ config:system:set overwritehost --value='{{ .Values.domain.nextcloud | default "nextcloud.sengporkeat.com" }}'
