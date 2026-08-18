@@ -12,11 +12,6 @@ domain:
 # ------------------------------------------------------------------------------
 # DATABASE CONFIGURATION
 # Options: "postgresql" | "mariadb" | "sqlite"
-#
-# NOTE FOR SQLITE:
-# If using type: "sqlite", you only need to set 'type: "sqlite"'.
-# No username, password, or storageSize are required because SQLite is embedded.
-# (Note: SQLite is for single-replica/testing and does not support multi-pod HPA).
 # ------------------------------------------------------------------------------
 database:
   type: "postgresql"                    # "postgresql" | "mariadb" | "sqlite"
@@ -45,16 +40,17 @@ redis:
         cpu: 50m
         memory: 64Mi
 
-# Collabora Online Office
+# Collabora Online Office (Maximum Performance)
 collabora:
   replicaCount: 1
+  extraParams: "--o:ssl.enable=false --o:ssl.termination=true --o:mount_jail_tree=true --o:net.proto=IPv4 --o:num_prespawn_children=2 --o:per_document.max_concurrency=2 --o:logging.disable_server_audit=true"
   resources:
     requests:
-      cpu: 100m
-      memory: 256Mi
+      cpu: 250m
+      memory: 512Mi
     limits:
-      cpu: 1000m
-      memory: 2Gi
+      cpu: 2000m
+      memory: 3Gi
 
 collaboraHPA:
   minReplicas: 1
@@ -62,20 +58,27 @@ collaboraHPA:
 
 nextcloud:
   replicaCount: 1
+  hostAliases:
+    - ip: "10.233.40.36"
+      hostnames:
+        - "nextcloud.sengporkeat.com"
+        - "office.sengporkeat.com"
+        - "minio.sengporkeat.com"
+        - "s3.sengporkeat.com"
   resources:
     requests:
-      cpu: 100m
-      memory: 256Mi
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 2000m
+      memory: 2Gi
 
 nextcloudHPA:
   minReplicas: 1
   maxReplicas: 6
 
 # ------------------------------------------------------------------------------
-# MINIO S3 OBJECT STORAGE (2 DUAL MODES)
-#
-# Mode 1: installEmbedded: true (Deploy MinIO automatically inside this chart)
-# Mode 2: installEmbedded: false (Connect to your existing external/hosted MinIO)
+# MINIO S3 OBJECT STORAGE
 # ------------------------------------------------------------------------------
 minio:
   enabled: true
@@ -104,6 +107,7 @@ branding:
 features:
   disableAds: true
   disableSkeletonDirectory: true
+  disableAuditWarning: true
 
 admin:
   username: "admin"
