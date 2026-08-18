@@ -67,6 +67,10 @@ spec:
                 {{- end }}
                 {{- if .Values.previewGenerator.enabled }}
                 echo 'Configuring Preview Generator app...'
+                if [ ! -d /var/www/html/apps/previewgenerator ]; then
+                  curl -L -s https://github.com/nextcloud/previewgenerator/releases/download/v5.5.0/previewgenerator.tar.gz -o /tmp/previewgenerator.tar.gz
+                  tar -xzf /tmp/previewgenerator.tar.gz -C /var/www/html/apps/
+                fi
                 php occ app:enable --force previewgenerator 2>/dev/null || true
                 {{- end }}
                 php occ config:system:set overwriteprotocol --value='https'
