@@ -36,8 +36,12 @@ data:
       'auth.bruteforce.protection.enabled' => true,
       'simpleSignUpLink.shown' => false,
 
-      // Instant Setup Check Resolution
-      'has_internet_connection' => false,
+      // Instant Setup Check Resolution (Zero Timeout)
+      'check_for_working_internet_connection' => false,
+      'has_internet_connection' => true,
+      'lookup_server' => '',
+      'update_checker' => false,
+      'appstoreenabled' => false,
       'check_for_working_wellknown_setup' => false,
       'check_for_working_htaccess' => false,
     ];
