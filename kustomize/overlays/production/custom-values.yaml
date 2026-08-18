@@ -21,6 +21,20 @@ database:
   database: "nextcloud"
   storageSize: 8Gi                      # Ignored when using sqlite
 
+# Disable MariaDB when PostgreSQL is selected
+mariadb:
+  enabled: false
+
+# Official Redis image
+redis:
+  enabled: true
+  image:
+    repository: redis
+    tag: 7.4-alpine
+  auth:
+    enabled: true
+    password: "RedisPassword@1234"
+
 # ------------------------------------------------------------------------------
 # MINIO S3 OBJECT STORAGE (2 DUAL MODES)
 #
@@ -29,17 +43,13 @@ database:
 # ------------------------------------------------------------------------------
 minio:
   enabled: true
-  installEmbedded: false               # true = Auto-deploy MinIO, false = Use existing MinIO
-  endpoint: "minio.minio-system.svc.cluster.local" # Or custom endpoint e.g. s3.amazonaws.com
-  port: 9000
-  bucket: "nextcloud-data"
+  installEmbedded: true                # Deploy MinIO automatically!
+  storageSize: 20Gi
+  storageClass: "longhorn"
   accessKey: "admin"
   secretKey: "Admin@1234"
-  useSsl: false
-  region: "us-east-1"
-  storageSize: 20Gi                      # Used when installEmbedded: true
-  consoleDomain: "minio.sengporkeat.com" # Used when installEmbedded: true
-  s3Domain: "s3.sengporkeat.com"         # Used when installEmbedded: true
+  consoleDomain: "minio.sengporkeat.com"
+  s3Domain: "s3.sengporkeat.com"
 
 # Theming & Local Images (Harmonized with Logo and Wallpaper)
 branding:
