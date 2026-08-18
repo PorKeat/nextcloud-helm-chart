@@ -65,9 +65,13 @@ spec:
                 php occ app:enable --force notify_push 2>/dev/null || true
                 php occ notify_push:setup https://{{ .Values.domain.nextcloud | default "nextcloud.sengporkeat.com" }}/push 2>/dev/null || true
                 {{- end }}
+                {{- if .Values.previewGenerator.enabled }}
+                echo 'Configuring Preview Generator app...'
+                php occ app:enable --force previewgenerator 2>/dev/null || true
+                {{- end }}
                 php occ config:system:set overwriteprotocol --value='https'
                 php occ config:system:set overwritehost --value='{{ .Values.domain.nextcloud | default "nextcloud.sengporkeat.com" }}'
                 php occ config:system:set overwrite.cli.url --value='https://{{ .Values.domain.nextcloud | default "nextcloud.sengporkeat.com" }}'
                 php occ config:system:set trusted_proxies 0 --value='10.0.0.0/8'
               "
-              echo "Theming, clean experience, and Notify Push applied successfully!"
+              echo "Theming, clean experience, and Preview Generator applied successfully!"

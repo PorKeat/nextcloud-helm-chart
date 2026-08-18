@@ -106,7 +106,12 @@ notifyPush:
       cpu: 200m
       memory: 128Mi
 
-# 9. Auto-Scaling (HPA)
+# 9. Preview Pre-generator (Smooth Gallery & Photo Scrolling)
+previewGenerator:
+  enabled: true
+  schedule: "*/15 * * * *"             # Runs background pre-rendering every 15 minutes
+
+# 10. Auto-Scaling (HPA)
 autoscaling:
   minReplicas: 1
   maxReplicas: 4

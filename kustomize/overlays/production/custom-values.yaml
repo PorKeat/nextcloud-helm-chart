@@ -52,6 +52,11 @@ notifyPush:
       cpu: 200m
       memory: 128Mi
 
+# Preview Pre-generator (Smooth Gallery & Photo Scrolling)
+previewGenerator:
+  enabled: true
+  schedule: "*/15 * * * *"             # Runs background pre-rendering every 15 minutes
+
 # Collabora Online Office (Maximum Performance with Lightweight Base Request)
 collabora:
   replicaCount: 1
