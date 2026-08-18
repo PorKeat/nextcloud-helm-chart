@@ -1,4 +1,3 @@
-{{- if .Values.branding.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -28,16 +27,15 @@ metadata:
   labels:
     {{- include "nextcloud-helmchart.labels" . | nindent 4 }}
 binaryData:
-  {{- if .Files.Get .Values.branding.images.backgroundImagePath }}
+  {{- if and .Values.branding .Values.branding.images (hasKey .Values.branding.images "backgroundImagePath") (.Files.Get .Values.branding.images.backgroundImagePath) }}
   background.png: {{ .Files.Get .Values.branding.images.backgroundImagePath | b64enc }}
   {{- end }}
-  {{- if .Files.Get .Values.branding.images.logoPath }}
+  {{- if and .Values.branding .Values.branding.images (hasKey .Values.branding.images "logoPath") (.Files.Get .Values.branding.images.logoPath) }}
   logo.png: {{ .Files.Get .Values.branding.images.logoPath | b64enc }}
   {{- end }}
-  {{- if .Files.Get .Values.branding.images.faviconPath }}
+  {{- if and .Values.branding .Values.branding.images (hasKey .Values.branding.images "faviconPath") (.Files.Get .Values.branding.images.faviconPath) }}
   favicon.png: {{ .Files.Get .Values.branding.images.faviconPath | b64enc }}
   {{- end }}
-  {{- if .Files.Get .Values.branding.images.navBarLogoPath }}
+  {{- if and .Values.branding .Values.branding.images (hasKey .Values.branding.images "navBarLogoPath") (.Files.Get .Values.branding.images.navBarLogoPath) }}
   nav-logo.png: {{ .Files.Get .Values.branding.images.navBarLogoPath | b64enc }}
   {{- end }}
-{{- end }}
