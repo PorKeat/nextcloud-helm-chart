@@ -103,6 +103,13 @@ autoscaling:
 
 nextcloud:
   replicaCount: 1
+  hostAliases:
+    - ip: "10.233.40.36"
+      hostnames:
+        - "nextcloud.sengporkeat.com"
+        - "office.sengporkeat.com"
+        - "minio.sengporkeat.com"
+        - "s3.sengporkeat.com"
   nextcloud:
     host: "nextcloud.sengporkeat.com"
     username: "admin"
