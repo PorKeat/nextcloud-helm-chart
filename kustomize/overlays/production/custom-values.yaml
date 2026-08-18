@@ -1,0 +1,64 @@
+# CUSTOM ENVIRONMENT OVERRIDES
+# Any field you change here automatically overrides the default values.yaml
+
+domain:
+  nextcloud: "nextcloud.sengporkeat.com"
+  collabora: "office.sengporkeat.com"
+
+# ------------------------------------------------------------------------------
+# DATABASE CONFIGURATION
+# Options: "postgresql" | "mariadb" | "sqlite"
+#
+# NOTE FOR SQLITE:
+# If using type: "sqlite", you only need to set 'type: "sqlite"'.
+# No username, password, or storageSize are required because SQLite is embedded.
+# (Note: SQLite is for single-replica/testing and does not support multi-pod HPA).
+# ------------------------------------------------------------------------------
+database:
+  type: "postgresql"                    # "postgresql" | "mariadb" | "sqlite"
+  username: "admin"
+  password: "Admin@1234"
+  database: "nextcloud"
+  storageSize: 8Gi                      # Ignored when using sqlite
+
+# ------------------------------------------------------------------------------
+# MINIO S3 OBJECT STORAGE (2 DUAL MODES)
+#
+# Mode 1: installEmbedded: true (Deploy MinIO automatically inside this chart)
+# Mode 2: installEmbedded: false (Connect to your existing external/hosted MinIO)
+# ------------------------------------------------------------------------------
+minio:
+  enabled: true
+  installEmbedded: false               # true = Auto-deploy MinIO, false = Use existing MinIO
+  endpoint: "minio.minio-system.svc.cluster.local" # Or custom endpoint e.g. s3.amazonaws.com
+  port: 9000
+  bucket: "nextcloud-data"
+  accessKey: "admin"
+  secretKey: "Admin@1234"
+  useSsl: false
+  region: "us-east-1"
+  storageSize: 20Gi                      # Used when installEmbedded: true
+  consoleDomain: "minio.sengporkeat.com" # Used when installEmbedded: true
+  s3Domain: "s3.sengporkeat.com"         # Used when installEmbedded: true
+
+# Theming & Local Images (Harmonized with Logo and Wallpaper)
+branding:
+  name: "Kubesquare Cloud"              # Name displayed in page title & login
+  slogan: "Secure Enterprise Storage"   # Slogan text under the logo
+  primaryColor: "#7D54D3"               # Vibrant Brand Purple (Exact sampled logo color)
+  backgroundColor: "#000000"            # True OLED Deep Black (Matches background canvas)
+  removeBackgroundImage: false          # false = Use background image
+  
+  images:
+    backgroundImagePath: "assets/background.png"  # Custom login background wallpaper
+    logoPath: "assets/logo.png"                    # Main login & page logo
+    faviconPath: "assets/favicon.png"              # Browser tab favicon icon
+    navBarLogoPath: "assets/nav-logo.png"          # Small top navigation bar logo
+
+features:
+  disableAds: true
+  disableSkeletonDirectory: true
+
+admin:
+  username: "admin"
+  password: "Admin@1234"

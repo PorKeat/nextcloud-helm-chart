@@ -1,0 +1,27 @@
+{{- if or .Values.features.disableAds .Values.features.disableSkeletonDirectory }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-clean-experience-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "nextcloud-helmchart.labels" . | nindent 4 }}
+data:
+  clean-experience.config.php: |
+    <?php
+    $CONFIG = [
+      {{- if .Values.features.disableSkeletonDirectory }}
+      'skeletondirectory' => '',
+      {{- end }}
+      {{- if .Values.features.disableAds }}
+      'firstrunwizard.enabled' => false,
+      'app.recommendations.enabled' => false,
+      'update_checker' => false,
+      'has_internet_connection' => true,
+      'appstoreenabled' => true,
+      'upgrade.disable-web' => true,
+      'show_community_support' => false,
+      'simpleSignUpLink.shown' => false,
+      {{- end }}
+    ];
+{{- end }}

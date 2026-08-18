@@ -1,0 +1,238 @@
+# ==============================================================================
+# QUICK CONFIGURATION (ONLY EDIT THIS TOP SECTION)
+# ==============================================================================
+
+# 1. Domain Names
+domain:
+  nextcloud: "nextcloud.sengporkeat.com"
+  collabora: "office.sengporkeat.com"
+
+# 2. Administrator Credentials
+admin:
+  username: "admin"
+  password: "Admin@1234"
+
+# 3. Nextcloud UI Theming & Custom Images (Local File Paths)
+branding:
+  name: "Kubesquare Cloud"              # Name displayed in page title & login
+  slogan: "Secure Enterprise Storage"   # Slogan text under the logo
+  primaryColor: "#9161EB"               # Primary color (Matches Purple Logo)
+  backgroundColor: "#000005"            # Fallback background color
+  removeBackgroundImage: false          # false = Use custom background image
+
+  # Local File Paths (Files stored inside charts/nextcloud-helmchart/assets/)
+  images:
+    backgroundImagePath: "assets/background.png"  # Custom login background wallpaper
+    logoPath: "assets/logo.png"                    # Main login & page logo
+    faviconPath: "assets/favicon.png"              # Browser tab favicon icon
+    navBarLogoPath: "assets/nav-logo.png"          # Small top navigation bar logo
+
+# 4. Clean Experience Features (Toggle True / False)
+features:
+  disableAds: true                 # Disables first-run wizard, promo popups, and recommendations
+  disableSkeletonDirectory: true   # Keeps new user accounts 100% empty (no default demo files/photos)
+
+# 5. MinIO S3 Object Storage (Primary Storage)
+minio:
+  endpoint: "minio.minio-system.svc.cluster.local"
+  port: 9000
+  bucket: "nextcloud-data"
+  accessKey: "admin"
+  secretKey: "Admin@1234"
+  useSsl: false
+  region: "us-east-1"
+
+# 6. PostgreSQL Database
+database:
+  username: "admin"
+  password: "Admin@1234"
+  database: "nextcloud"
+  storageSize: 8Gi
+
+# 7. Redis Session Cache
+redis:
+  enabled: true
+  password: "RedisPassword@1234"
+
+# 8. Auto-Scaling (HPA)
+autoscaling:
+  minReplicas: 2
+  maxReplicas: 6
+  nextcloudTargetCPU: 70
+  collaboraTargetCPU: 75
+
+# ==============================================================================
+# ADVANCED DEFAULTS (NO NEED TO TOUCH BELOW)
+# ==============================================================================
+
+nextcloud:
+  replicaCount: 2
+  nextcloud:
+    host: "nextcloud.sengporkeat.com"
+    username: "admin"
+    password: "Admin@1234"
+    
+    # Auto-mount Configurations
+    extraVolumes:
+      - name: collabora-config
+        configMap:
+          name: nextcloud-nextcloud-autoconfig
+      - name: clean-experience-config
+        configMap:
+          name: nextcloud-clean-experience-config
+      - name: theming-config
+        configMap:
+          name: nextcloud-theming-config
+    extraVolumeMounts:
+      - name: collabora-config
+        mountPath: /var/www/html/config/collabora.config.php
+        subPath: collabora.config.php
+      - name: clean-experience-config
+        mountPath: /var/www/html/config/clean-experience.config.php
+        subPath: clean-experience.config.php
+      - name: theming-config
+        mountPath: /var/www/html/config/theming.config.php
+        subPath: theming.config.php
+
+    objectStore:
+      s3:
+        enabled: true
+        bucket: "nextcloud-data"
+        autocreate: true
+        key: "admin"
+        secret: "Admin@1234"
+        host: "minio.minio-system.svc.cluster.local"
+        port: 9000
+        useSsl: false
+        region: "us-east-1"
+        usePathStyle: true
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 2Gi
+
+  ingress:
+    enabled: true
+    className: traefik
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.tls: "true"
+    path: /
+    pathType: Prefix
+    tls:
+      - hosts:
+          - "nextcloud.sengporkeat.com"
+        secretName: nextcloud-tls-secret
+
+  internalDatabase:
+    enabled: false
+  mariadb:
+    enabled: false
+
+  postgresql:
+    enabled: true
+    auth:
+      postgresPassword: "Admin@1234"
+      password: "Admin@1234"
+      username: "admin"
+      database: "nextcloud"
+    primary:
+      persistence:
+        enabled: true
+        storageClass: "longhorn"
+        size: 8Gi
+
+  externalDatabase:
+    enabled: true
+    type: postgresql
+    host: "nextcloud-postgresql.nextcloud-system.svc.cluster.local:5432"
+    database: "nextcloud"
+    user: "admin"
+    password: "Admin@1234"
+
+  persistence:
+    enabled: true
+    storageClass: "longhorn"
+    accessMode: ReadWriteOnce
+    size: 8Gi
+
+  startupProbe:
+    enabled: true
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    failureThreshold: 30
+
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 120
+    periodSeconds: 15
+
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 120
+    periodSeconds: 15
+
+nextcloudHPA:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+collabora:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: collabora/code
+    tag: latest
+    pullPolicy: IfNotPresent
+  domain: "office.sengporkeat.com"
+  aliasGroups:
+    - host: "https://nextcloud.sengporkeat.com"
+  env:
+    - name: extra_params
+      value: "--o:ssl.enable=false --o:ssl.termination=true"
+    - name: username
+      value: "admin"
+    - name: password
+      value: "Admin@1234"
+    - name: dictionaries
+      value: "en_US"
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 2000m
+      memory: 4Gi
+  ingress:
+    enabled: true
+    className: traefik
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.tls: "true"
+    tls:
+      - hosts:
+          - "office.sengporkeat.com"
+        secretName: collabora-office-tls
+
+collaboraHPA:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 75
+
+redis:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: true
+    password: "RedisPassword@1234"
+  master:
+    persistence:
+      enabled: false

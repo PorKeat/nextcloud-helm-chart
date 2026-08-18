@@ -1,0 +1,45 @@
+# ==============================================================================
+# GITIGNORE RULES (FILES & SENSITIVE DATA NOT TO PUSH TO GIT)
+# ==============================================================================
+
+# 1. Operating System & Editor Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# 2. Secrets & Production Overrides (Never commit real production passwords!)
+*.secret.yaml
+*.local.yaml
+*-credentials.yaml
+.env
+.env.*
+!*.env.example
+
+# 3. Helm Dependencies & Generated Tarballs
+charts/nextcloud-helmchart/charts/*.tgz
+charts/nextcloud-helmchart/tmpcharts/
+*.tgz
+.helm/
+
+# 4. Certificates & Keys
+*.key
+*.crt
+*.pem
+*.pfx
+*.p12
+
+# 5. Local Logs and Temporary Dumps
+*.log
+*.tmp
+*.bak
+/tmp/
+/scratch/

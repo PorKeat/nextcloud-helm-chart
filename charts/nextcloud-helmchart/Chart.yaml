@@ -1,0 +1,19 @@
+apiVersion: v2
+name: nextcloud-helmchart
+description: Unified Nextcloud Umbrella Helm Chart with Collabora Online Office, Redis, MinIO S3, Multi-Database support (PostgreSQL/MariaDB/SQLite), and HPA
+type: application
+version: 1.0.0
+appVersion: "34.0.2"
+
+dependencies:
+  - name: nextcloud
+    version: 9.2.5
+    repository: https://nextcloud.github.io/helm/
+  - name: redis
+    version: 20.6.0
+    repository: https://charts.bitnami.com/bitnami
+    condition: redis.enabled
+  - name: mariadb
+    version: 20.2.1
+    repository: https://charts.bitnami.com/bitnami
+    condition: mariadb.enabled

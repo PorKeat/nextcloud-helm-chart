@@ -1,0 +1,59 @@
+{{- if .Values.collabora.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-collabora
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: collabora
+spec:
+  replicas: {{ .Values.collabora.replicaCount | default 2 }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: collabora
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: collabora
+    spec:
+      containers:
+        - name: collabora
+          image: "{{ .Values.collabora.image.repository }}:{{ .Values.collabora.image.tag }}"
+          imagePullPolicy: {{ .Values.collabora.image.pullPolicy | default "IfNotPresent" }}
+          env:
+            {{- if .Values.collabora.domain }}
+            - name: domain
+              value: "{{ .Values.collabora.domain }}"
+            {{- end }}
+            {{- if .Values.collabora.aliasGroups }}
+            - name: aliasgroup1
+              value: "{{ (index .Values.collabora.aliasGroups 0).host }}"
+            {{- end }}
+            {{- range .Values.collabora.env }}
+            - name: {{ .name }}
+              value: "{{ .value }}"
+            {{- end }}
+          ports:
+            - name: wopi
+              containerPort: 9980
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.collabora.resources | nindent 12 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-collabora
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: collabora
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9980
+      targetPort: 9980
+      protocol: TCP
+      name: wopi
+  selector:
+    app.kubernetes.io/name: collabora
+{{- end }}

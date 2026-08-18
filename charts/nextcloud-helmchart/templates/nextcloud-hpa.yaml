@@ -1,0 +1,29 @@
+{{- if .Values.nextcloudHPA.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ .Release.Name }}-nextcloud-hpa
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: nextcloud
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ .Release.Name }}-nextcloud
+  minReplicas: {{ .Values.nextcloudHPA.minReplicas | default 2 }}
+  maxReplicas: {{ .Values.nextcloudHPA.maxReplicas | default 6 }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.nextcloudHPA.targetCPUUtilizationPercentage | default 70 }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.nextcloudHPA.targetMemoryUtilizationPercentage | default 80 }}
+{{- end }}

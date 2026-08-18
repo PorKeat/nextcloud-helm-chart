@@ -1,0 +1,153 @@
+{{- if and .Values.minio.enabled .Values.minio.installEmbedded }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-minio-pvc
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: minio
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ .Values.minio.storageClass | default "longhorn" }}
+  resources:
+    requests:
+      storage: {{ .Values.minio.storageSize | default "20Gi" }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-minio
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: minio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: minio
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: minio
+    spec:
+      containers:
+        - name: minio
+          image: "{{ .Values.minio.image.repository }}:{{ .Values.minio.image.tag }}"
+          command:
+            - /bin/sh
+            - -c
+            - minio server /data --console-address :9001
+          env:
+            - name: MINIO_ROOT_USER
+              value: "{{ .Values.minio.accessKey | default "admin" }}"
+            - name: MINIO_ROOT_PASSWORD
+              value: "{{ .Values.minio.secretKey | default "Admin@1234" }}"
+            {{- if .Values.minio.license }}
+            - name: MINIO_LICENSE
+              value: "{{ .Values.minio.license }}"
+            {{- end }}
+          ports:
+            - name: s3-api
+              containerPort: 9000
+            - name: console
+              containerPort: 9001
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-minio-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-minio
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: minio
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9000
+      targetPort: 9000
+      name: s3-api
+    - port: 9001
+      targetPort: 9001
+      name: console
+  selector:
+    app.kubernetes.io/name: minio
+{{- if .Values.minio.ingress.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-minio-ingress
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - {{ .Values.minio.consoleDomain | default "minio.sengporkeat.com" }}
+        - {{ .Values.minio.s3Domain | default "s3.sengporkeat.com" }}
+      secretName: {{ .Release.Name }}-minio-tls
+  rules:
+    - host: {{ .Values.minio.consoleDomain | default "minio.sengporkeat.com" }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}-minio
+                port:
+                  number: 9001
+    - host: {{ .Values.minio.s3Domain | default "s3.sengporkeat.com" }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}-minio
+                port:
+                  number: 9000
+{{- end }}
+---
+# Auto-Create Bucket Post-Install Job
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-minio-create-bucket
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: minio-bucket-creator
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: mc
+          image: minio/mc:latest
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "Waiting for MinIO server to start..."
+              until mc alias set local http://{{ .Release.Name }}-minio:9000 {{ .Values.minio.accessKey | default "admin" }} {{ .Values.minio.secretKey | default "Admin@1234" }}; do
+                sleep 2
+              done
+              echo "Creating bucket {{ .Values.minio.bucket | default "nextcloud-data" }} if it does not exist..."
+              mc mb --ignore-existing local/{{ .Values.minio.bucket | default "nextcloud-data" }}
+              echo "Bucket ready!"
+{{- end }}

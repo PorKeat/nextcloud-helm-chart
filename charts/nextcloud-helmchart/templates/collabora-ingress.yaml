@@ -1,0 +1,24 @@
+{{- if and .Values.collabora.enabled .Values.collabora.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-collabora-ingress
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    {{- toYaml .Values.collabora.ingress.annotations | nindent 4 }}
+spec:
+  ingressClassName: {{ .Values.collabora.ingress.className | default "traefik" }}
+  tls:
+    {{- toYaml .Values.collabora.ingress.tls | nindent 4 }}
+  rules:
+    - host: {{ .Values.collabora.domain }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}-collabora
+                port:
+                  number: 9980
+{{- end }}
