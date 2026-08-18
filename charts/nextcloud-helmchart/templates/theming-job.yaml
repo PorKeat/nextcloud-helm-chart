@@ -28,10 +28,11 @@ spec:
               POD_NAME=$(kubectl get pod -l app.kubernetes.io/name=nextcloud -n {{ .Release.Namespace }} -o jsonpath='{.items[0].metadata.name}')
               echo "Applying custom colors and branding..."
               kubectl exec -n {{ .Release.Namespace }} $POD_NAME -c nextcloud -- su -s /bin/bash www-data -c "
-                php occ config:app:set theming name --value='{{ .Values.branding.name | default "Kubesquare Cloud" }}'
-                php occ config:app:set theming slogan --value='{{ .Values.branding.slogan | default "Secure Enterprise Storage" }}'
-                php occ config:app:set theming color --value='{{ .Values.branding.primaryColor | default "#7D54D3" }}'
-                php occ config:app:set theming background_color --value='{{ .Values.branding.backgroundColor | default "#000000" }}'
+                php occ theming:config name '{{ .Values.branding.name | default "Unity Drive" }}'
+                php occ theming:config slogan '{{ .Values.branding.slogan | default "Secure Enterprise Storage" }}'
+                php occ theming:config primary_color '{{ .Values.branding.primaryColor | default "#7D54D3" }}'
+                php occ theming:config background_color '{{ .Values.branding.backgroundColor | default "#000000" }}'
+                php occ maintenance:theme:update
                 php occ config:system:set overwriteprotocol --value='https'
                 php occ config:system:set overwritehost --value='{{ .Values.domain.nextcloud | default "nextcloud.sengporkeat.com" }}'
                 php occ config:system:set overwrite.cli.url --value='https://{{ .Values.domain.nextcloud | default "nextcloud.sengporkeat.com" }}'
