@@ -26,7 +26,7 @@ spec:
               echo "Waiting for Nextcloud pod to be ready..."
               kubectl wait --for=condition=Ready pod -l app.kubernetes.io/name=nextcloud -n {{ .Release.Namespace }} --timeout=300s
               POD_NAME=$(kubectl get pod -l app.kubernetes.io/name=nextcloud -n {{ .Release.Namespace }} -o jsonpath='{.items[0].metadata.name}')
-              echo "Applying custom colors, branding, and disabling popup ads..."
+              echo "Applying custom colors, branding, and Collabora Office..."
               kubectl exec -n {{ .Release.Namespace }} $POD_NAME -c nextcloud -- su -s /bin/bash www-data -c "
                 php occ theming:config name '{{ .Values.branding.name | default "Unity Drive" }}'
                 php occ theming:config slogan '{{ .Values.branding.slogan | default "Secure Enterprise Storage" }}'
@@ -43,9 +43,13 @@ spec:
                 php occ config:system:set skeletondirectory --value=''
                 {{- end }}
                 {{- if .Values.collabora.enabled }}
-                echo 'Installing and activating Nextcloud Office (richdocuments) for Collabora...'
-                php occ app:install richdocuments || php occ app:enable richdocuments
-                php occ config:app:set richdocuments wopi_url --value='https://{{ .Values.domain.collabora | default .Values.collabora.domain }}'
+                echo 'Activating Nextcloud Office (richdocuments) for Collabora...'
+                if [ ! -d /var/www/html/apps/richdocuments ]; then
+                  curl -L -s https://github.com/nextcloud-releases/richdocuments/releases/download/v11.1.0/richdocuments-v11.1.0.tar.gz -o /tmp/richdocuments.tar.gz
+                  tar -xzf /tmp/richdocuments.tar.gz -C /var/www/html/apps/
+                fi
+                php occ app:enable --force richdocuments
+                php occ config:app:set richdocuments wopi_url --value='http://{{ .Release.Name }}-collabora:9980'
                 php occ config:app:set richdocuments public_wopi_url --value='https://{{ .Values.domain.collabora | default .Values.collabora.domain }}'
                 php occ config:app:set richdocuments disable_certificate_verification --value='yes'
                 php occ richdocuments:activate-config
