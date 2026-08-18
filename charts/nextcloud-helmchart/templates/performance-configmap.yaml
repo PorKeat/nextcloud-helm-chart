@@ -36,4 +36,5 @@ data:
       'auth.bruteforce.protection.enabled' => true,
       'simpleSignUpLink.shown' => false,
       'backgroundjobs_mode' => 'cron',
+      'has_internet_connection' => false,
     ];
