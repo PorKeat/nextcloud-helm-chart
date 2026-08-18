@@ -1,6 +1,10 @@
 # CUSTOM ENVIRONMENT OVERRIDES
 # Any field you change here automatically overrides the default values.yaml
 
+global:
+  security:
+    allowInsecureImages: true
+
 domain:
   nextcloud: "nextcloud.sengporkeat.com"
   collabora: "office.sengporkeat.com"
@@ -25,7 +29,7 @@ database:
 mariadb:
   enabled: false
 
-# Redis (Bitnami Debian-based image which includes bash)
+# Redis (Allow custom image)
 redis:
   enabled: true
   image:
