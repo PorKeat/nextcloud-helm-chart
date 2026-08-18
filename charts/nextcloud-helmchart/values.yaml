@@ -180,6 +180,7 @@ nextcloud:
       cert-manager.io/cluster-issuer: letsencrypt-prod
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
       traefik.ingress.kubernetes.io/router.tls: "true"
+      traefik.ingress.kubernetes.io/router.middlewares: nextcloud-system-nextcloud-security-headers@kubernetescrd,nextcloud-system-nextcloud-redirect-dav@kubernetescrd
     path: /
     pathType: Prefix
     tls:
