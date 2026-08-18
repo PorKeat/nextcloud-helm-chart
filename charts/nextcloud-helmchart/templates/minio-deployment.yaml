@@ -12,7 +12,7 @@ spec:
   storageClassName: {{ .Values.minio.storageClass | default "longhorn" }}
   resources:
     requests:
-      storage: {{ .Values.minio.storageSize | default "10Gi" }}
+      storage: {{ .Values.minio.storageSize | default "20Gi" }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -39,7 +39,9 @@ spec:
           command:
             - /bin/sh
             - -c
-            - minio server /data --console-address :9001
+            - |
+              mkdir -p /data/{{ .Values.minio.bucket | default "nextcloud-data" }}
+              exec minio server /data --console-address :9001
           env:
             - name: MINIO_ROOT_USER
               value: "{{ .Values.minio.accessKey | default "admin" }}"
