@@ -12,12 +12,21 @@ admin:
   username: "admin"
   password: "Admin@1234"
 
-# 3. Nextcloud UI Theming & Custom Images (Local File Paths)
+# 3. Database Engine Selection
+# Options: "postgresql" (Recommended for High Traffic), "mariadb", or "sqlite" (Simple / Lightweight)
+database:
+  type: "postgresql"                    # "postgresql" | "mariadb" | "sqlite"
+  username: "admin"
+  password: "Admin@1234"
+  database: "nextcloud"
+  storageSize: 8Gi                      # Ignored when using sqlite
+
+# 4. Nextcloud UI Theming & Custom Images (Local File Paths)
 branding:
-  name: "Kubesquare Cloud"              # Name displayed in page title & login
+  name: "Unity Drive"                   # Name displayed in page title & login
   slogan: "Secure Enterprise Storage"   # Slogan text under the logo
-  primaryColor: "#9161EB"               # Primary color (Matches Purple Logo)
-  backgroundColor: "#000005"            # Fallback background color
+  primaryColor: "#7D54D3"               # Primary color (Matches Purple Logo)
+  backgroundColor: "#000000"            # Fallback background color
   removeBackgroundImage: false          # false = Use custom background image
 
   # Local File Paths (Files stored inside charts/nextcloud-helmchart/assets/)
@@ -27,13 +36,17 @@ branding:
     faviconPath: "assets/favicon.png"              # Browser tab favicon icon
     navBarLogoPath: "assets/nav-logo.png"          # Small top navigation bar logo
 
-# 4. Clean Experience Features (Toggle True / False)
+# 5. Clean Experience Features (Toggle True / False)
 features:
   disableAds: true                 # Disables first-run wizard, promo popups, and recommendations
   disableSkeletonDirectory: true   # Keeps new user accounts 100% empty (no default demo files/photos)
 
-# 5. MinIO S3 Object Storage (Primary Storage)
+# 6. MinIO S3 Object Storage (Primary Storage)
 minio:
+  enabled: true
+  installEmbedded: true
+  storageSize: 20Gi
+  storageClass: "longhorn"
   endpoint: "minio.minio-system.svc.cluster.local"
   port: 9000
   bucket: "nextcloud-data"
@@ -41,13 +54,8 @@ minio:
   secretKey: "Admin@1234"
   useSsl: false
   region: "us-east-1"
-
-# 6. PostgreSQL Database
-database:
-  username: "admin"
-  password: "Admin@1234"
-  database: "nextcloud"
-  storageSize: 8Gi
+  consoleDomain: "minio.sengporkeat.com"
+  s3Domain: "s3.sengporkeat.com"
 
 # 7. Redis Session Cache
 redis:
@@ -56,7 +64,7 @@ redis:
 
 # 8. Auto-Scaling (HPA)
 autoscaling:
-  minReplicas: 2
+  minReplicas: 1
   maxReplicas: 6
   nextcloudTargetCPU: 70
   collaboraTargetCPU: 75
@@ -66,7 +74,7 @@ autoscaling:
 # ==============================================================================
 
 nextcloud:
-  replicaCount: 2
+  replicaCount: 1
   nextcloud:
     host: "nextcloud.sengporkeat.com"
     username: "admin"
@@ -108,8 +116,8 @@ nextcloud:
         usePathStyle: true
     resources:
       requests:
-        cpu: 250m
-        memory: 512Mi
+        cpu: 100m
+        memory: 256Mi
       limits:
         cpu: 1000m
         memory: 2Gi
@@ -129,8 +137,6 @@ nextcloud:
         secretName: nextcloud-tls-secret
 
   internalDatabase:
-    enabled: false
-  mariadb:
     enabled: false
 
   postgresql:
@@ -153,6 +159,9 @@ nextcloud:
     database: "nextcloud"
     user: "admin"
     password: "Admin@1234"
+
+  mariadb:
+    enabled: false
 
   persistence:
     enabled: true
@@ -178,14 +187,14 @@ nextcloud:
 
 nextcloudHPA:
   enabled: true
-  minReplicas: 2
+  minReplicas: 1
   maxReplicas: 6
   targetCPUUtilizationPercentage: 70
   targetMemoryUtilizationPercentage: 80
 
 collabora:
   enabled: true
-  replicaCount: 2
+  replicaCount: 1
   image:
     repository: collabora/code
     tag: latest
@@ -204,11 +213,11 @@ collabora:
       value: "en_US"
   resources:
     requests:
-      cpu: 500m
-      memory: 1Gi
+      cpu: 100m
+      memory: 256Mi
     limits:
-      cpu: 2000m
-      memory: 4Gi
+      cpu: 1000m
+      memory: 2Gi
   ingress:
     enabled: true
     className: traefik
@@ -223,7 +232,7 @@ collabora:
 
 collaboraHPA:
   enabled: true
-  minReplicas: 2
+  minReplicas: 1
   maxReplicas: 6
   targetCPUUtilizationPercentage: 75
 

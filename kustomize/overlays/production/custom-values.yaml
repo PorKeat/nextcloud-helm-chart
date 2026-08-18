@@ -45,7 +45,7 @@ redis:
         cpu: 50m
         memory: 64Mi
 
-# Collabora Online Office (Adjusted for cluster resource fit)
+# Collabora Online Office
 collabora:
   replicaCount: 1
   resources:
@@ -89,7 +89,7 @@ minio:
 
 # Theming & Local Images (Harmonized with Logo and Wallpaper)
 branding:
-  name: "Kubesquare Cloud"              # Name displayed in page title & login
+  name: "Unity Drive"                   # Name displayed in page title & login
   slogan: "Secure Enterprise Storage"   # Slogan text under the logo
   primaryColor: "#7D54D3"               # Vibrant Brand Purple (Exact sampled logo color)
   backgroundColor: "#000000"            # True OLED Deep Black (Matches background canvas)
