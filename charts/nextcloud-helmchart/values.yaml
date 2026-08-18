@@ -129,7 +129,7 @@ clamav:
 # 11. Auto-Scaling (HPA)
 autoscaling:
   minReplicas: 2
-  maxReplicas: 6
+  maxReplicas: 3
   nextcloudTargetCPU: 70
   collaboraTargetCPU: 75
 
@@ -309,7 +309,7 @@ nextcloud:
 nextcloudHPA:
   enabled: true
   minReplicas: 2
-  maxReplicas: 6
+  maxReplicas: 3
   targetCPUUtilizationPercentage: 70
   targetMemoryUtilizationPercentage: 80
 
@@ -354,5 +354,5 @@ collabora:
 collaboraHPA:
   enabled: true
   minReplicas: 2
-  maxReplicas: 6
+  maxReplicas: 3
   targetCPUUtilizationPercentage: 75

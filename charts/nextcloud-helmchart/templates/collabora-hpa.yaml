@@ -20,4 +20,13 @@ spec:
         target:
           type: Utilization
           averageUtilization: {{ .Values.collaboraHPA.targetCPUUtilizationPercentage | default 75 }}
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Pods
+        value: 1
+        periodSeconds: 30
+    scaleDown:
+      stabilizationWindowSeconds: 300
 {{- end }}

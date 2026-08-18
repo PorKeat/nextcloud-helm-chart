@@ -26,4 +26,13 @@ spec:
         target:
           type: Utilization
           averageUtilization: {{ .Values.nextcloudHPA.targetMemoryUtilizationPercentage | default 80 }}
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Pods
+        value: 1
+        periodSeconds: 30
+    scaleDown:
+      stabilizationWindowSeconds: 300
 {{- end }}
