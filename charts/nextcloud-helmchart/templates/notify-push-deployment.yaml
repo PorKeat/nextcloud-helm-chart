@@ -31,8 +31,22 @@ spec:
               value: "https://{{ .Values.domain.nextcloud | default "nextcloud.sengporkeat.com" }}"
             - name: REDIS_URL
               value: "redis://:{{ .Values.redis.auth.password | default "RedisPassword@1234" }}@{{ .Release.Name }}-redis-master:6379"
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-db
+                  key: db-username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-db
+                  key: db-password
+            - name: DB_HOST
+              value: "{{ .Release.Name }}-postgresql"
+            - name: DB_NAME
+              value: "{{ .Values.database.database | default "nextcloud" }}"
             - name: DATABASE_URL
-              value: "postgres://{{ .Values.database.username | default "admin" }}:{{ .Values.database.password | default "Admin@1234" }}@{{ .Release.Name }}-postgresql:5432/{{ .Values.database.database | default "nextcloud" }}"
+              value: "postgres://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):5432/$(DB_NAME)"
             - name: DATABASE_PREFIX
               value: "oc_"
             - name: ALLOW_SELF_SIGNED
