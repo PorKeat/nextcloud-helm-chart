@@ -39,6 +39,37 @@ redis:
   auth:
     enabled: true
     password: "RedisPassword@1234"
+  master:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+
+# Collabora Online Office (Adjusted for cluster resource fit)
+collabora:
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+
+collaboraHPA:
+  minReplicas: 1
+  maxReplicas: 6
+
+nextcloud:
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+nextcloudHPA:
+  minReplicas: 1
+  maxReplicas: 6
 
 # ------------------------------------------------------------------------------
 # MINIO S3 OBJECT STORAGE (2 DUAL MODES)
