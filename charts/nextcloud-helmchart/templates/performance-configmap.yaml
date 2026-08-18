@@ -20,4 +20,19 @@ data:
       ],
       'default_phone_region' => 'US',
       'maintenance_window_start' => 1,
+      
+      // High Performance & Instant Routing Tunings
+      'enable_previews' => true,
+      'preview_max_x' => 1024,
+      'preview_max_y' => 1024,
+      'preview_max_memory' => 256,
+      'preview_max_filesize_image' => 20,
+      'preview_concurrency_new' => 4,
+      'preview_concurrency_all' => 8,
+      
+      'filesystem_check_changes' => 0,       // Skip checking local disk changes (files managed in S3/DB)
+      'filelocking.ttl' => 3600,
+      'session_lifetime' => 86400,
+      'auth.bruteforce.protection.enabled' => true,
+      'simpleSignUpLink.shown' => false,
     ];

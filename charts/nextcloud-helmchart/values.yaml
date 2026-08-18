@@ -108,6 +108,23 @@ nextcloud:
     username: "admin"
     password: "Admin@1234"
     
+    # High Performance PHP & OPcache Environment Flags
+    phpConfigs:
+      opcache.ini: |
+        opcache.enable=1
+        opcache.enable_cli=1
+        opcache.memory_consumption=256
+        opcache.interned_strings_buffer=32
+        opcache.max_accelerated_files=30000
+        opcache.revalidate_freq=60
+        opcache.fast_shutdown=1
+        opcache.save_comments=1
+        memory_limit=1024M
+        upload_max_filesize=16G
+        post_max_size=16G
+        max_execution_time=3600
+        max_input_time=3600
+    
     # Auto-mount Configurations
     extraVolumes:
       - name: collabora-config
@@ -150,10 +167,10 @@ nextcloud:
         usePathStyle: true
     resources:
       requests:
-        cpu: 100m
-        memory: 256Mi
+        cpu: 250m
+        memory: 512Mi
       limits:
-        cpu: 1000m
+        cpu: 2000m
         memory: 2Gi
 
   ingress:
@@ -185,6 +202,13 @@ nextcloud:
         enabled: true
         storageClass: "longhorn"
         size: 8Gi
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          cpu: 1000m
+          memory: 1Gi
 
   externalDatabase:
     enabled: true
