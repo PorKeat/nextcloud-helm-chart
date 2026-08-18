@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
         - name: minio
-          image: "{{ .Values.minio.image.repository }}:{{ .Values.minio.image.tag }}"
+          image: "{{ if .Values.minio.image }}{{ .Values.minio.image.repository }}:{{ .Values.minio.image.tag }}{{ else }}quay.io/minio/aistor/minio:RELEASE.2026-07-24T16-43-31Z{{ end }}"
           command:
             - /bin/sh
             - -c
@@ -80,7 +80,6 @@ spec:
       name: console
   selector:
     app.kubernetes.io/name: minio
-{{- if .Values.minio.ingress.enabled }}
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -119,9 +118,7 @@ spec:
                 name: {{ .Release.Name }}-minio
                 port:
                   number: 9000
-{{- end }}
 ---
-# Auto-Create Bucket Post-Install Job
 apiVersion: batch/v1
 kind: Job
 metadata:
