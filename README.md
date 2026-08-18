@@ -1,6 +1,6 @@
 # Nextcloud Enterprise Helm Chart (Nextcloud + Collabora + Redis + MinIO + HPA)
 
-A production-ready Umbrella Helm Chart and Kustomize package for deploying Nextcloud with Collabora Online Office, Redis session caching, MinIO S3 object storage, and Horizontal Pod Autoscaling (HPA: 2 to 6 replicas).
+A production-ready Umbrella Helm Chart and configuration package for deploying Nextcloud with Collabora Online Office, Redis session caching, MinIO S3 object storage, and Horizontal Pod Autoscaling (HPA: 2 to 6 replicas).
 
 ---
 
@@ -90,7 +90,7 @@ database:
 ## Directory Structure
 
 ```text
-nextcloud-helmchart/
+nextcloud-helm-chart/
 ├── README.md                           # Documentation & deployment instructions
 ├── .gitignore                          # Clean repository ignore file
 │
@@ -112,31 +112,23 @@ nextcloud-helmchart/
 │           └── theming-configmap.yaml  # Applies custom branding colors & embedded images
 │
 └── kustomize/
-    ├── base/
-    │   └── kustomization.yaml          # Base Kustomize manifest referencing the Helm chart
     └── overlays/production/
-        ├── kustomization.yaml          # Production overlay
         └── custom-values.yaml          # Easily customizable environment overrides
 ```
 
 ---
 
-## Deployment Commands
+## Deployment Command (Single Step)
 
-### Deploy with Helm
 ```bash
-# 1. Download Helm chart dependencies (First time only)
+# 1. Build chart dependencies
 helm dependency build ./charts/nextcloud-helmchart
 
-# 2. Deploy or upgrade the full stack
+# 2. Deploy or upgrade with your custom-values overrides
 helm upgrade --install nextcloud ./charts/nextcloud-helmchart \
   --namespace nextcloud-system \
-  --create-namespace
-```
-
-### Deploy with Kustomize
-```bash
-kubectl apply -k ./kustomize/overlays/production/ --enable-helm
+  --create-namespace \
+  -f ./kustomize/overlays/production/custom-values.yaml
 ```
 
 ---
