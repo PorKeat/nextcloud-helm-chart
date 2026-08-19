@@ -16,7 +16,7 @@ data:
           'secret' => '{{ .Values.minio.secretKey | default "Admin@1234" }}',
           'hostname' => '{{ .Release.Name }}-minio',
           'port' => {{ .Values.minio.port | default 9000 }},
-          'use_ssl' => {{ .Values.minio.useSsl | default false | quote }},
+          'use_ssl' => false,
           'region' => '{{ .Values.minio.region | default "us-east-1" }}',
           'use_path_style' => true,
         ),
