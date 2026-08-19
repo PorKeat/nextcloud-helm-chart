@@ -93,39 +93,24 @@ data:
       php /var/www/html/occ config:system:set overwrite.cli.url --value='https://{{ .Values.domain.nextcloud | default "nextcloud.sengporkeat.com" }}' 2>/dev/null || true
       php /var/www/html/occ config:system:set trusted_proxies 0 --value='10.0.0.0/8' 2>/dev/null || true
       
-      # Upload custom logo and background image into Nextcloud appdata
-      APPDATA_DIR=$(php /var/www/html/occ config:system:get datadirectory 2>/dev/null)
-      INSTANCE_ID=$(php /var/www/html/occ config:system:get instanceid 2>/dev/null)
-      THEMING_DIR="${APPDATA_DIR}/appdata_${INSTANCE_ID}/theming/global/images"
-      mkdir -p "${THEMING_DIR}"
-      chown -R www-data:www-data "${THEMING_DIR}"
-      
+      # Upload custom logo and background image into Nextcloud appdata using S3 compatible API commands
       if [ -f /custom_assets/logo.png ]; then
-        cp /custom_assets/logo.png "${THEMING_DIR}/logo"
-        chown www-data:www-data "${THEMING_DIR}/logo"
+        php /var/www/html/occ theming:config logo /custom_assets/logo.png 2>/dev/null || true
         php /var/www/html/occ config:app:set theming logoMime --value='image/png' 2>/dev/null || true
-        LOGO_VER=$(php /var/www/html/occ config:app:get theming logoVersion 2>/dev/null || echo "0")
-        php /var/www/html/occ config:app:set theming logoVersion --value=$((LOGO_VER + 1)) 2>/dev/null || true
-        echo "[Auto-Setup Hook] Logo uploaded."
+        echo "[Auto-Setup Hook] Logo uploaded to S3."
       fi
       
       if [ -f /custom_assets/background.png ]; then
-        cp /custom_assets/background.png "${THEMING_DIR}/background"
-        chown www-data:www-data "${THEMING_DIR}/background"
+        php /var/www/html/occ theming:config background /custom_assets/background.png 2>/dev/null || true
         php /var/www/html/occ config:app:set theming backgroundMime --value='image/png' 2>/dev/null || true
-        BG_VER=$(php /var/www/html/occ config:app:get theming backgroundVersion 2>/dev/null || echo "0")
-        php /var/www/html/occ config:app:set theming backgroundVersion --value=$((BG_VER + 1)) 2>/dev/null || true
-        echo "[Auto-Setup Hook] Background image uploaded."
+        echo "[Auto-Setup Hook] Background image uploaded to S3."
       fi
       
       if [ -f /custom_assets/favicon.png ]; then
-        cp /custom_assets/favicon.png "${THEMING_DIR}/favicon"
-        chown www-data:www-data "${THEMING_DIR}/favicon"
+        php /var/www/html/occ theming:config favicon /custom_assets/favicon.png 2>/dev/null || true
         php /var/www/html/occ config:app:set theming faviconMime --value='image/png' 2>/dev/null || true
-        echo "[Auto-Setup Hook] Favicon uploaded."
+        echo "[Auto-Setup Hook] Favicon uploaded to S3."
       fi
-      
-      php /var/www/html/occ files:scan-app-data 2>/dev/null || true
       php /var/www/html/occ maintenance:theme:update 2>/dev/null || true
       echo "[Auto-Setup Hook] Direct in-pod configuration applied successfully!"
     fi
