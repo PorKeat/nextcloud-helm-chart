@@ -38,8 +38,6 @@ data:
       'backgroundjobs_mode' => 'cron',
       'has_internet_connection' => true,
       'connectivity_check_domains' => [
-          'www.google.com',
-          'www.cloudflare.com',
-          'www.github.com'
+          'nextcloud.sengporkeat.com'
       ],
     ];
