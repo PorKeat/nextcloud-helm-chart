@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-s3-config
+  namespace: {{ .Release.Namespace }}
+data:
+  s3.config.php: |
+    <?php
+    $CONFIG = array (
+      'objectstore' => array(
+        'class' => '\OC\Files\ObjectStore\S3',
+        'arguments' => array(
+          'bucket' => '{{ .Values.minio.bucket | default "nextcloud-data" }}',
+          'autocreate' => true,
+          'key'    => '{{ .Values.minio.accessKey | default "admin" }}',
+          'secret' => '{{ .Values.minio.secretKey | default "Admin@1234" }}',
+          'hostname' => '{{ .Release.Name }}-minio',
+          'port' => {{ .Values.minio.port | default 9000 }},
+          'use_ssl' => {{ .Values.minio.useSsl | default false | quote }},
+          'region' => '{{ .Values.minio.region | default "us-east-1" }}',
+          'use_path_style' => true,
+        ),
+      ),
+    );

@@ -178,6 +178,10 @@ nextcloud:
     
     # Auto-mount Configurations & In-Pod Hooks
     extraVolumes:
+      - name: s3-config
+        configMap:
+          name: nextcloud-s3-config
+
       - name: collabora-config
         configMap:
           name: nextcloud-nextcloud-autoconfig
@@ -195,6 +199,10 @@ nextcloud:
         configMap:
           name: nextcloud-custom-assets
     extraVolumeMounts:
+      - name: s3-config
+        mountPath: /var/www/html/config/s3.config.php
+        subPath: s3.config.php
+
       - name: collabora-config
         mountPath: /var/www/html/config/collabora.config.php
         subPath: collabora.config.php
