@@ -48,7 +48,7 @@ spec:
             - name: MINIO_ROOT_PASSWORD
               value: "{{ .Values.minio.secretKey | default "Admin@1234" }}"
             {{- if .Values.minio.license }}
-            - name: MINIO_LICENSE
+            - name: MINIO_SUBNET_LICENSE
               value: "{{ .Values.minio.license }}"
             {{- end }}
           ports:
