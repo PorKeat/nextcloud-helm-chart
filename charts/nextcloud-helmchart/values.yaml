@@ -51,6 +51,7 @@ features:
   disableAds: true                 # Disables first-run wizard, promo popups, and recommendations
   disableSkeletonDirectory: true   # Keeps new user accounts 100% empty (no default demo files/photos)
   disableAuditWarning: true        # Completely suppresses Collabora Server Audit popup modal
+  enableServerSideEncryption: true # Automatically enables default module and server side encryption
 
 # 6. MinIO S3 Object Storage (Primary Storage)
 minio:

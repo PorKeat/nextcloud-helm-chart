@@ -44,6 +44,12 @@ data:
       php /var/www/html/occ config:system:set skeletondirectory --value='' 2>/dev/null || true
       {{- end }}
       
+      {{- if .Values.features.enableServerSideEncryption }}
+      php /var/www/html/occ app:enable --force encryption 2>/dev/null || true
+      php /var/www/html/occ encryption:enable 2>/dev/null || true
+      php /var/www/html/occ encryption:set-default-module OC_DEFAULT_MODULE 2>/dev/null || true
+      {{- end }}
+      
       {{- if .Values.collabora.enabled }}
       if [ ! -d /var/www/html/apps/richdocuments ]; then
         curl -L -s https://github.com/nextcloud-releases/richdocuments/releases/download/v11.1.0/richdocuments-v11.1.0.tar.gz -o /tmp/richdocuments.tar.gz
