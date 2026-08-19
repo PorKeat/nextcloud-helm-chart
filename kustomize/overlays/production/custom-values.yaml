@@ -121,6 +121,8 @@ nextcloudHPA:
 # MINIO S3 OBJECT STORAGE
 # ------------------------------------------------------------------------------
 minio:
+  license: ""
+
   enabled: true
   installEmbedded: true                # Deploy MinIO automatically!
   storageSize: 20Gi
