@@ -30,7 +30,7 @@ spec:
             - name: NEXTCLOUD_URL
               value: "https://{{ .Values.domain.nextcloud | default "nextcloud.sengporkeat.com" }}"
             - name: REDIS_URL
-              value: "redis://:{{ .Values.redis.auth.password | default "RedisPassword@1234" }}@{{ .Release.Name }}-redis-master:6379"
+              value: "redis://:{{ .Values.redis.auth.password | default "RedisPassword@1234" | urlquery }}@{{ .Release.Name }}-redis-master:6379"
             - name: DB_USER
               valueFrom:
                 secretKeyRef:

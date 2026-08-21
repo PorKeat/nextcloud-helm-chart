@@ -28,7 +28,7 @@ spec:
                 - |
                   POD_NAME=$(kubectl get pod -l app.kubernetes.io/name=nextcloud -n {{ .Release.Namespace }} --field-selector=status.phase=Running -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
                   if [ -n "$POD_NAME" ]; then
-                    kubectl exec -n {{ .Release.Namespace }} $POD_NAME -c nextcloud -- php /var/www/html/occ background:cron
+                    kubectl exec -n {{ .Release.Namespace }} $POD_NAME -c nextcloud -- su www-data -s /bin/bash -c 'if [ -f /var/www/html/occ ] && [ -f /var/www/html/lib/versioncheck.php ]; then php /var/www/html/occ background:cron; else echo "Nextcloud is still initializing files. Skipping cron."; fi'
                   else
                     echo "Nextcloud pod not ready, skipping cron run."
                   fi
