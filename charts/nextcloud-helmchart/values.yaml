@@ -182,6 +182,9 @@ nextcloud:
     
     # Auto-mount Configurations & In-Pod Hooks
     extraVolumes:
+      - name: php-session-ini
+        configMap:
+          name: nextcloud-php-session-ini
       - name: s3-config
         configMap:
           name: nextcloud-s3-config
@@ -203,6 +206,10 @@ nextcloud:
         configMap:
           name: nextcloud-custom-assets
     extraVolumeMounts:
+      - name: php-session-ini
+        mountPath: /usr/local/etc/php/conf.d/session.ini
+        subPath: session.ini
+        readOnly: true
       - name: s3-config
         mountPath: /var/www/html/config/s3.config.php
         subPath: s3.config.php
