@@ -71,6 +71,9 @@ minio:
   region: "us-east-1"
   consoleDomain: "minio.sengporkeat.com"
   s3Domain: "s3.sengporkeat.com"
+  # Optional: Override internal cluster hostname if using an external MinIO IP
+  # externalHostname: "10.1.18.7"
+  # useSSL: true
 
 # 7. Redis Session Cache (Bitnami Redis with Debian base)
 redis:
